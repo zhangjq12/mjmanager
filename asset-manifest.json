@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/mjmanager/static/css/main.316b387c.css",
+    "main.js": "/mjmanager/static/js/main.965c85d1.js",
+    "static/js/787.a42697a0.chunk.js": "/mjmanager/static/js/787.a42697a0.chunk.js",
+    "index.html": "/mjmanager/index.html",
+    "main.316b387c.css.map": "/mjmanager/static/css/main.316b387c.css.map",
+    "main.965c85d1.js.map": "/mjmanager/static/js/main.965c85d1.js.map",
+    "787.a42697a0.chunk.js.map": "/mjmanager/static/js/787.a42697a0.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.316b387c.css",
+    "static/js/main.965c85d1.js"
+  ]
+}
