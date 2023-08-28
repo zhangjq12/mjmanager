@@ -1,23 +1,24 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState } from "react";
+import "./App.css";
+import { Demo } from "./pages/demo/demo";
+// import { Home } from "./pages/home";
+import { Match } from "./pages/match";
 
 function App() {
+  const [chars, setChars] = useState([]);
+  const [page, setPage] = useState(1);
+  const callback = (chars) => {
+    setChars(chars);
+    setPage(2);
+  };
+  const endCallback = () => {
+    setPage(1);
+  }
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {/* <Home></Home> */}
+      {page === 1 && <Demo callback={callback} />}
+      {page === 2 && <Match chars={chars} endCallback={endCallback}/>}
     </div>
   );
 }

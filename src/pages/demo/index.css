@@ -1,0 +1,12 @@
+.demo-logo {
+  color: white;
+  margin: 0 auto 0 0;
+}
+.right-button {
+  margin: 0 0 0 auto;
+}
+.layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
