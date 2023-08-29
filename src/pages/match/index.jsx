@@ -24,6 +24,7 @@ export const Match = ({ chars, endCallback }) => {
     }, 1000);
 
     setPlayers(chars);
+    realData = [];
 
     return () => {
       clearInterval(timer);
@@ -65,6 +66,8 @@ export const Match = ({ chars, endCallback }) => {
   }, [data]);
 
   const onClick = () => {
+    setData([]);
+    setPlayers([]);
     endCallback();
   };
 

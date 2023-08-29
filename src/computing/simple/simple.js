@@ -108,6 +108,8 @@ export const simpleComputing = (players, isStart, isGameStart) => {
         xunNumber = 0;
         benchang = 0;
         lizhibang = 0;
+        isGameEnd = false;
+        isAllEnd = false;
       } else {
         xunNumber++;
         if (xunNumber > 17) {
@@ -286,15 +288,38 @@ const getShoupai = (xiangting, players) => {
   return newXiangting;
 };
 
-const getHupai = (pos, players, base = 0.5) => {
-  const ran = Math.random();
+const getHupai = (pos, players) => {
+  const weightChar = {
+    1: 100 - getPlayerDetail(seats[getNextFeng(pos)], players).defense,
+    2:
+      100 -
+      getPlayerDetail(seats[getNextFeng(getNextFeng(pos))], players).defense,
+    3:
+      100 -
+      getPlayerDetail(
+        seats[getNextFeng(getNextFeng(getNextFeng(pos)))],
+        players
+      ).defense,
+  };
+
+  let totalWeight = 0;
+  for (const key in weightChar) {
+    totalWeight += weightChar[key];
+  }
+  const weightHu = {
+    0: 50,
+    1: totalWeight,
+  };
+  // const ran = Math.random();
+  const ran = weightRand(weightHu, 0);
   let way = "荣和";
-  if (ran >= base) {
+  if (ran === 0) {
     way = "自摸和牌";
   }
 
   const pointran = weightRand(reachMj.pointWeight, 1);
   if (way === "荣和") {
+    delete weightChar[0];
     // const charran = Math.random() * 3;
     // let dianpao = "";
     // if (charran >= 0 && charran < 1) {
@@ -304,18 +329,6 @@ const getHupai = (pos, players, base = 0.5) => {
     // } else if (charran >= 2 && charran < 3) {
     //   dianpao = getNextFeng(getNextFeng(getNextFeng(pos)));
     // }
-    const weightChar = {
-      1: 100 - getPlayerDetail(seats[getNextFeng(pos)], players).defense,
-      2:
-        100 -
-        getPlayerDetail(seats[getNextFeng(getNextFeng(pos))], players).defense,
-      3:
-        100 -
-        getPlayerDetail(
-          seats[getNextFeng(getNextFeng(getNextFeng(pos)))],
-          players
-        ).defense,
-    };
     const charran = weightRand(weightChar, 1);
     let dianpao = "";
     if (charran === 1) {
@@ -325,10 +338,20 @@ const getHupai = (pos, players, base = 0.5) => {
     } else if (charran === 3) {
       dianpao = getNextFeng(getNextFeng(getNextFeng(pos)));
     }
+
     let point = reachMj.pointRong[pointran];
+    if (pointran <= 4) {
+      point = computingFushu(pointran);
+      if (point > 2000) point = 2000;
+      if (point < 250) point = 250;
+    }
+
     if (pos === "e") {
-      point = point * 1.5;
+      point = Math.ceil((point * 6) / 100) * 100;
       benchang++;
+    } else {
+      point = Math.ceil((point * 4) / 100) * 100;
+      benchang = 0;
     }
     points[seats[pos]] +=
       point + benchang * reachMj.benchang + lizhibang * reachMj.lizhibang;
@@ -337,28 +360,33 @@ const getHupai = (pos, players, base = 0.5) => {
     return `${seats[dianpao]}放铳！${seats[pos]} ${way}${point}点`;
   } else {
     let point = reachMj.pointZimo[pointran];
+    if (pointran <= 4) {
+      point = computingFushu(pointran);
+      if (point > 2000) point = 2000;
+      if (point < 250) point = 250;
+      // point = Math.ceil(point * 4 / 100) * 100;
+    }
+
     if (pos === "e") {
-      point = point * 1.5;
+      point = Math.ceil((point * 2) / 100) * 100;
       points[seats[pos]] +=
-        point +
-        Math.round(point / 3) +
-        benchang * reachMj.benchang +
-        lizhibang * reachMj.lizhibang;
+        point * 4 + benchang * reachMj.benchang + lizhibang * reachMj.lizhibang;
       for (let key in points) {
-        points[key] -= Math.round(point / 3);
+        points[key] -= point;
       }
       benchang++;
     } else {
       points[seats[pos]] +=
-        point +
-        Math.round(point / 4) +
+        Math.ceil((point * 2) / 100) * 100 +
+        Math.ceil(point / 100) * 100 * 3 +
         benchang * reachMj.benchang +
         lizhibang * reachMj.lizhibang;
       for (let key in points) {
-        points[key] -= Math.round(point / 4);
+        points[key] -= Math.ceil(point / 100) * 100;
       }
       benchang = 0;
-      points[seats["e"]] -= Math.round(point / 4);
+      points[seats["e"]] +=
+        Math.ceil(point / 100) * 100 - Math.ceil((point * 2) / 100) * 100;
     }
     lizhibang = 0;
 
@@ -400,6 +428,12 @@ const getLiuju = () => {
     }
   }
   benchang += 1;
+};
+
+const computingFushu = (fanshu) => {
+  const fushuWeight = reachMj.fushuWeight;
+  const ran = weightRand(fushuWeight, 20);
+  return ran * Math.pow(2, parseInt(fanshu) + 2);
 };
 
 const setPosition = (players) => {
@@ -454,13 +488,19 @@ const weightRand = (weights, start) => {
     rangeHead += weight;
   }
 
+  const weightKeys = Object.keys(weights);
+
+  if (start === undefined) {
+    start = parseInt(weightKeys[0]);
+  }
+
   const pran = Math.random();
   let pointran = -1;
   for (let i = 0; i < weightArr.length; i++) {
     if (i === 0 && pran < weightArr[i]) {
       pointran = start;
     } else if (pran < weightArr[i] && pran > weightArr[i - 1]) {
-      pointran = i + start;
+      pointran = parseInt(weightKeys[i]);
     } else {
       continue;
     }
