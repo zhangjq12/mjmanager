@@ -342,8 +342,8 @@ const getHupai = (pos, players) => {
     let point = reachMj.pointRong[pointran];
     if (pointran <= 4) {
       point = computingFushu(pointran);
-      if (point > 2000) point = 2000;
-      if (point < 250) point = 250;
+      if (point >= 2000) point = 2000;
+      if (point <= 250) point = 250;
     }
 
     if (pos === "e") {
@@ -362,35 +362,44 @@ const getHupai = (pos, players) => {
     let point = reachMj.pointZimo[pointran];
     if (pointran <= 4) {
       point = computingFushu(pointran);
-      if (point > 2000) point = 2000;
-      if (point < 250) point = 250;
+      if (point >= 2000) point = 2000;
+      if (point <= 250) point = 250;
       // point = Math.ceil(point * 4 / 100) * 100;
     }
 
+    let finalPoint = 0;
     if (pos === "e") {
-      point = Math.ceil((point * 2) / 100) * 100;
+      const personalPoint = Math.ceil((point * 2) / 100) * 100;
       points[seats[pos]] +=
-        point * 4 + benchang * reachMj.benchang + lizhibang * reachMj.lizhibang;
-      for (let key in points) {
-        points[key] -= point;
-      }
-      benchang++;
-    } else {
-      points[seats[pos]] +=
-        Math.ceil((point * 2) / 100) * 100 +
-        Math.ceil(point / 100) * 100 * 3 +
+        personalPoint * 4 +
         benchang * reachMj.benchang +
         lizhibang * reachMj.lizhibang;
       for (let key in points) {
-        points[key] -= Math.ceil(point / 100) * 100;
+        points[key] -= personalPoint;
+      }
+      finalPoint = personalPoint * 3;
+      benchang++;
+    } else {
+      const personalPoint = point;
+      points[seats[pos]] +=
+        Math.ceil((personalPoint * 2) / 100) * 100 +
+        Math.ceil(personalPoint / 100) * 100 * 3 +
+        benchang * reachMj.benchang +
+        lizhibang * reachMj.lizhibang;
+      for (let key in points) {
+        points[key] -= Math.ceil(personalPoint / 100) * 100;
       }
       benchang = 0;
-      points[seats["e"]] +=
-        Math.ceil(point / 100) * 100 - Math.ceil((point * 2) / 100) * 100;
+      points[seats.e] +=
+        Math.ceil(personalPoint / 100) * 100 -
+        Math.ceil((personalPoint * 2) / 100) * 100;
+      finalPoint =
+        Math.ceil(personalPoint / 100) * 100 * 2 +
+        Math.ceil((personalPoint * 2) / 100) * 100;
     }
     lizhibang = 0;
 
-    return `${seats[pos]} ${way}${point}点`;
+    return `${seats[pos]} ${way}${finalPoint}点`;
   }
 };
 
