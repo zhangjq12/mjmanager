@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./App.css";
 import { Demo } from "./pages/demo/demo";
-// import { Home } from "./pages/home";
+import { Home } from "./pages/home";
 import { Match } from "./pages/match";
 
 function App() {

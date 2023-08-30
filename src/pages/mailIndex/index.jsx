@@ -20,11 +20,11 @@ export const MailIndex = ({ data, selectedKey, onSelect }) => {
   }, [data, selectedKey]);
 
   return (
-    <Layout style={{ padding: "24px 0", background: "white" }}>
+    <Layout style={{ padding: "24px 0", background: "white", height: "100%" }}>
       <Sider style={{ background: "white" }} width={200}>
         <Menu
           mode="inline"
-          style={{ height: "100%" }}
+          style={{ height: "100%", overflowY: "auto" }}
           selectedKeys={[selectedKey]}
           items={
             data &&

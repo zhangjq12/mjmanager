@@ -45,7 +45,7 @@ export const Match = ({ chars, endCallback }) => {
       isAllEnd = data.allEnd;
 
       // generateMock();
-      realData.push(data.data);
+      realData.push(...data.data);
       if (isAllEnd) {
         setEndDisabled(false);
         clearInterval(timer);
