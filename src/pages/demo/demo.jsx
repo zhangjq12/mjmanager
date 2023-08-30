@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Layout, Button, Checkbox, Row, Col, Descriptions } from "antd";
+import {
+  Layout,
+  Button,
+  Checkbox,
+  Row,
+  Col,
+  Descriptions,
+  message,
+} from "antd";
 import "./index.css";
 import { mockChar } from "../../computing/mock/mock";
 
@@ -29,7 +37,8 @@ export const Demo = ({ callback }) => {
   }, []);
 
   const onClick = () => {
-    callback(names);
+    if (names.length >= 4) callback(names);
+    else message.error("要选够4人开始");
   };
 
   const checkboxChange = (arr) => {
