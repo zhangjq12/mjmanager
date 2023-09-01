@@ -9,11 +9,12 @@ const { Header, Content, Footer } = Layout;
 export let realData = [];
 // let players = ["日麻教父", "赤五教主", "艾斯艾芙", "小*豆"];
 
-export const Match = ({ chars, endCallback }) => {
+export const Match = ({ chars, endCallback, today, gameName }) => {
   const [players, setPlayers] = useState([]);
   const [currentTime, setCurrentTime] = useState("");
   const [data, setData] = useState();
   const [endDisabled, setEndDisabled] = useState(true);
+  const [res, setRes] = useState();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -50,6 +51,12 @@ export const Match = ({ chars, endCallback }) => {
         setEndDisabled(false);
         clearInterval(timer);
         setData([...realData]);
+
+        const finalRes = data.finalRes;
+        finalRes.gameName = gameName;
+        finalRes.gameDate = today;
+        setRes(finalRes);
+
         return;
       }
       setData([...realData]);
@@ -58,6 +65,7 @@ export const Match = ({ chars, endCallback }) => {
     return () => {
       clearInterval(timer);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [players]);
 
   useEffect(() => {
@@ -68,7 +76,7 @@ export const Match = ({ chars, endCallback }) => {
   const onClick = () => {
     setData([]);
     setPlayers([]);
-    endCallback();
+    endCallback(res);
   };
 
   return (

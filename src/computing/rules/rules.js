@@ -70,6 +70,14 @@ export const reachMj = {
     12: 0.1,
     13: 0.05,
   },
+  madian: {
+    1: 20,
+    2: 10,
+    3: -10,
+    4: -20,
+  },
+  yuandian: 25000,
+  fandian: 30000,
   benchang: 300,
   lizhibang: 1000,
 }

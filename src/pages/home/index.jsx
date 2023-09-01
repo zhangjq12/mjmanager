@@ -15,10 +15,13 @@ import { MailIndex } from "../mailIndex";
 import { LineUp } from "../lineUp";
 import { Recruit } from "../recruit";
 import { Training } from "../training";
-import { mockChar } from "../../computing/mock/mock";
+import { Standings } from "../standings";
+// import { mockChar } from "../../computing/mock/mock";
 import { continueGame } from "../../computing/processing/processing";
-import { Calendar, REACHMJ_SCHEDULE } from "../../computing/mock/calendar";
+// import { Calendar, Schedule } from "../../computing/mock/calendar";
 import { Match } from "../match";
+// import { StandingsMock } from "../../computing/mock/standings";
+import { standingsMap } from "../../data/standings/standings";
 
 const { Header, Content, Footer } = Layout;
 
@@ -62,7 +65,7 @@ const { Header, Content, Footer } = Layout;
 //   },
 // ];
 
-export const Home = () => {
+export const Home = ({ originData }) => {
   const [currentTime, setCurrentTime] = useState("");
   const [menuKeys, setMenuKeys] = useState(1);
   const [mailBadgeCount, setMailBadgeCount] = useState(0);
@@ -71,11 +74,13 @@ export const Home = () => {
   const [chars, setChars] = useState([]);
   const [today, setToday] = useState("");
 
+  const [originMailData, setOriginMailData] = useState([]);
   const [mailData, setMailData] = useState([]);
   const [mailSelectedKey, setMailSelectedKey] = useState();
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerTitle, setDrawerTitle] = useState("日历");
+  const [drawerClosable, setDrawerClosable] = useState(false);
 
   const [continueButton, setContinueButton] = useState("继续游戏");
 
@@ -83,6 +88,11 @@ export const Home = () => {
   const [gamePlayers, setGamePlayers] = useState([]);
   const [gameStartModalOpen, setGameStartModalOpen] = useState(false);
   const [charWatched, setCharWatched] = useState("");
+  const [charInvited, setCharsInvited] = useState([]);
+  const [matchPlayers, setMatchPlayers] = useState({});
+
+  const [calendar, setCalendar] = useState({});
+  const [schedule, setSchedule] = useState({});
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -93,41 +103,38 @@ export const Home = () => {
     }, 1000);
 
     // const data = setMailReadStatus(mockMails);
-    let originData = localStorage.getItem("SAVED_DATA");
-    if (!originData) {
-      originData = {
-        players: mockChar,
-        mails: [
-          {
-            key: 1,
-            label: "欢迎",
-            read: false,
-            content: "欢迎来到麻将经理人",
-          },
-        ],
-        teamMembers: [mockChar[0], mockChar[1]],
-        date: "2023/8/31",
-      };
+
+    if (originData) {
+      setPlayers(originData.players);
+      setChars(originData.teamMembers);
+      setToday(originData.date);
+      setCalendar(originData.calendar);
+      setSchedule(originData.schedule);
+      standingsMap.init(originData.standings);
+
+      const playersMap = {};
+      for (const player of originData.players) {
+        playersMap[player.id] = player;
+      }
+      setPlayersMap(playersMap);
+
+      const { res: data, lastIndex } = setMailReadStatus(originData.mails);
+      originData.mails[lastIndex].read = true;
+      setOriginMailData(originData.mails);
+      setMailData(data);
+      setMailBadgeCount(data.filter((v) => !v.read).length);
+
+      if (originData.calendar[originData.date] && originData.match) {
+        setCharsInvited(Object.keys(originData.match));
+        setMatchPlayers(originData.match);
+        setContinueButton("进行比赛")
+      }
     }
-
-    setPlayers(originData.players);
-    setChars(originData.teamMembers);
-    setToday(originData.date);
-
-    const playersMap = {};
-    for (const player of originData.players) {
-      playersMap[player.id] = player;
-    }
-    setPlayersMap(playersMap);
-
-    const data = setMailReadStatus(originData.mails);
-    setMailData(data);
-    setMailBadgeCount(data.filter((v) => !v.read).length);
 
     return () => {
       clearInterval(timer);
     };
-  }, []);
+  }, [originData]);
 
   const setMailReadStatus = (itemsMap) => {
     let lastUnRead = 0;
@@ -159,18 +166,21 @@ export const Home = () => {
       res[lastIndex].read = true;
     }
 
-    return res;
+    return { res, lastIndex };
   };
 
   const mailSelectedCallback = (info) => {
     const index = mailData.findIndex((v) => v.key === parseInt(info.key));
     const mailItems = mailData;
+    const originMailItems = originMailData;
     if (!mailItems[index].read) {
       mailItems[index].label = mailItems[index].originLabel;
       mailItems[index].read = true;
+      originMailItems[index].read = true;
     }
     setMailBadgeCount(mailItems.filter((v) => !v.read).length);
     // setMailItems([...mailItems]);
+    setOriginMailData([...originMailItems]);
     setMailSelectedKey(info.key);
   };
 
@@ -178,6 +188,7 @@ export const Home = () => {
     if (continueButton === "继续游戏") {
       let thisDay = new Date(today);
       setDrawerTitle("进行中……");
+      setDrawerClosable(false);
       setDrawerOpen(true);
       await processing(thisDay);
     } else if (continueButton === "进行比赛") {
@@ -185,17 +196,32 @@ export const Home = () => {
     }
   };
 
-  const processing = async (thisDay) => {
+  const processing = async (thisDay, singleGameRes = undefined) => {
     thisDay = new Date(thisDay);
     thisDay = new Date(
       thisDay.setDate(thisDay.getDate() + 1)
     ).toLocaleDateString();
 
-    const { players: newP, messages } = continueGame(players, chars);
+    const {
+      players: newP,
+      messages,
+      match,
+    } = await continueGame(
+      players,
+      chars,
+      calendar,
+      schedule,
+      thisDay,
+      playersMap,
+      singleGameRes,
+      charWatched,
+      charInvited
+    );
     setPlayers(newP);
 
-    if (messages.length > 0 || Calendar[thisDay] !== undefined) {
+    if (messages.length > 0) {
       const newMailData = [...mailData];
+      const newOriginMailData = [...originMailData];
       messages.forEach((v) => {
         newMailData.unshift({
           key: newMailData.length + 1,
@@ -203,15 +229,41 @@ export const Home = () => {
           label: v.title,
           content: v.content,
         });
+        newOriginMailData.unshift({
+          key: newOriginMailData.length + 1,
+          read: false,
+          label: v.title,
+          content: v.content,
+        });
       });
-      const data = setMailReadStatus(newMailData);
+      const { res: data, lastIndex } = setMailReadStatus(newMailData);
+      newOriginMailData[lastIndex].read = true;
       setMailData(data);
+      setOriginMailData(newOriginMailData);
       setMailBadgeCount(data.filter((v) => !v.read).length);
       setToday(thisDay);
       setDrawerOpen(false);
-      if (Calendar[thisDay] !== undefined) {
+      if (Object.keys(match).length > 0) {
+        setCharsInvited(Object.keys(match));
+        setMatchPlayers(match);
         setContinueButton("进行比赛");
+      } else {
+        setContinueButton("继续游戏");
       }
+
+      localStorage.setItem(
+        "SAVED_DATA",
+        JSON.stringify({
+          players: players,
+          mails: newOriginMailData,
+          teamMembers: chars,
+          date: thisDay,
+          calendar: calendar,
+          schedule: schedule,
+          standings: standingsMap.standingMap,
+          match: match,
+        })
+      );
     } else {
       setToday(thisDay);
       setTimeout(() => {
@@ -220,8 +272,13 @@ export const Home = () => {
     }
   };
 
-  const endCallback = () => {
+  const endCallback = async (res) => {
     setGameStart(false);
+    let thisDay = new Date(today);
+    setDrawerTitle("进行中……");
+    setDrawerClosable(false);
+    setDrawerOpen(true);
+    await processing(thisDay, res);
   };
 
   const menuNode = [
@@ -237,13 +294,17 @@ export const Home = () => {
       key: 2,
       label: "阵容",
     },
+    // {
+    //   key: 3,
+    //   label: "招募",
+    // },
+    // {
+    //   key: 4,
+    //   label: "训练",
+    // },
     {
-      key: 3,
-      label: "招募",
-    },
-    {
-      key: 4,
-      label: "训练",
+      key: 5,
+      label: "排名",
     },
   ];
 
@@ -270,8 +331,8 @@ export const Home = () => {
             style={{ backgroundColor: "rgb(245, 245, 245)", height: "100%" }}
           >
             <p>{today}</p>
-            {Object.keys(Calendar).findIndex((v) => v === today) > -1 && (
-              <div>{Calendar[today]}</div>
+            {Object.keys(calendar).findIndex((v) => v === today) > -1 && (
+              <div>{calendar[today]}</div>
             )}
           </div>
         </Col>
@@ -280,8 +341,8 @@ export const Home = () => {
             style={{ backgroundColor: "rgb(245, 245, 245)", height: "100%" }}
           >
             <p>{nextDay}</p>
-            {Object.keys(Calendar).findIndex((v) => v === nextDay) > -1 && (
-              <div>{Calendar[nextDay]}</div>
+            {Object.keys(calendar).findIndex((v) => v === nextDay) > -1 && (
+              <div>{calendar[nextDay]}</div>
             )}
           </div>
         </Col>
@@ -290,8 +351,8 @@ export const Home = () => {
             style={{ backgroundColor: "rgb(245, 245, 245)", height: "100%" }}
           >
             <p>{thirdDay}</p>
-            {Object.keys(Calendar).findIndex((v) => v === thirdDay) > -1 && (
-              <div>{Calendar[thirdDay]}</div>
+            {Object.keys(calendar).findIndex((v) => v === thirdDay) > -1 && (
+              <div>{calendar[thirdDay]}</div>
             )}
           </div>
         </Col>
@@ -300,8 +361,8 @@ export const Home = () => {
             style={{ backgroundColor: "rgb(245, 245, 245)", height: "100%" }}
           >
             <p>{forthDay}</p>
-            {Object.keys(Calendar).findIndex((v) => v === forthDay) > -1 && (
-              <div>{Calendar[forthDay]}</div>
+            {Object.keys(calendar).findIndex((v) => v === forthDay) > -1 && (
+              <div>{calendar[forthDay]}</div>
             )}
           </div>
         </Col>
@@ -310,8 +371,8 @@ export const Home = () => {
             style={{ backgroundColor: "rgb(245, 245, 245)", height: "100%" }}
           >
             <p>{fifthDay}</p>
-            {Object.keys(Calendar).findIndex((v) => v === fifthDay) > -1 && (
-              <div>{Calendar[fifthDay]}</div>
+            {Object.keys(calendar).findIndex((v) => v === fifthDay) > -1 && (
+              <div>{calendar[fifthDay]}</div>
             )}
           </div>
         </Col>
@@ -320,8 +381,8 @@ export const Home = () => {
             style={{ backgroundColor: "rgb(245, 245, 245)", height: "100%" }}
           >
             <p>{sixthDay}</p>
-            {Object.keys(Calendar).findIndex((v) => v === sixthDay) > -1 && (
-              <div>{Calendar[sixthDay]}</div>
+            {Object.keys(calendar).findIndex((v) => v === sixthDay) > -1 && (
+              <div>{calendar[sixthDay]}</div>
             )}
           </div>
         </Col>
@@ -349,7 +410,14 @@ export const Home = () => {
             }}
           />
           <div className="right-button">
-            <div style={{ padding: "0 10px", color: "white" }}>
+            <div
+              style={{ padding: "0 10px", color: "white" }}
+              onClick={() => {
+                setDrawerTitle("未来日程");
+                setDrawerClosable(true);
+                setDrawerOpen(true);
+              }}
+            >
               今日日期：{today}
             </div>
             <Button type="primary" onClick={onContinueGame}>
@@ -370,11 +438,13 @@ export const Home = () => {
               onSelect={mailSelectedCallback}
             />
           ) : menuKeys === 2 ? (
-            <LineUp />
+            <LineUp players={chars} />
           ) : menuKeys === 3 ? (
             <Recruit />
           ) : menuKeys === 4 ? (
             <Training />
+          ) : menuKeys === 5 ? (
+            <Standings standings={standingsMap} playersMap={playersMap} />
           ) : null}
         </Content>
         <Footer
@@ -391,8 +461,11 @@ export const Home = () => {
         placement={"top"}
         closable={false}
         open={drawerOpen}
-        maskClosable={false}
+        maskClosable={drawerClosable}
         height={200}
+        onClose={() => {
+          setDrawerOpen(false);
+        }}
       >
         {calendarNodes()}
       </Drawer>
@@ -402,32 +475,33 @@ export const Home = () => {
           setGameStartModalOpen(false);
         }}
         onOk={() => {
-          let resChar = [];
-          for (const match of REACHMJ_SCHEDULE[today]) {
-            let boo = false;
-            for (const player of match) {
-              if (player.toString() === charWatched.toString()) {
-                boo = true;
-                resChar = match.map((v) => {
-                  return playersMap[v];
-                });
-                break;
-              }
-            }
-            if (boo) break;
-          }
+          // let resChar = [];
+          // for (const match of schedule[calendar[today]][today]) {
+          //   let boo = false;
+          //   for (const player of match) {
+          //     if (player.toString() === charWatched.toString()) {
+          //       boo = true;
+          //       resChar = match.map((v) => {
+          //         return playersMap[v];
+          //       });
+          //       break;
+          //     }
+          //   }
+          //   if (boo) break;
+          // }
 
-          setGamePlayers(resChar);
+          setGamePlayers(matchPlayers[charWatched]);
           setGameStart(true);
+          setGameStartModalOpen(false);
         }}
         open={gameStartModalOpen}
       >
         <div>选择你要观看的队员：</div>
         <Radio.Group
-          options={chars.map((v) => {
+          options={charInvited.map((v) => {
             return {
-              label: v.name,
-              value: v.id,
+              label: playersMap[v].name,
+              value: v,
             };
           })}
           onChange={({ target: { value } }) => {
@@ -437,6 +511,11 @@ export const Home = () => {
       </Modal>
     </>
   ) : (
-    <Match chars={gamePlayers} endCallback={endCallback} />
+    <Match
+      chars={gamePlayers}
+      endCallback={endCallback}
+      date={today}
+      gameName={calendar[today]}
+    />
   );
 };

@@ -15,7 +15,20 @@ export const MailIndex = ({ data, selectedKey, onSelect }) => {
       return;
     }
     setContentLabel(data[index].originLabel);
-    setContent(data[index].content);
+    let content = data[index].content;
+    let contentRes = [];
+    let contentChild = "";
+    for (let i = 0; i < content.length; i++) {
+      if (content[i] === "\n") {
+        contentRes.push(<span key={i - 1}>{contentChild}</span>);
+        contentRes.push(<br key={i} />);
+        contentChild = "";
+        continue;
+      }
+      contentChild += content[i];
+    }
+    contentRes.push(contentChild);
+    setContent(contentRes);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, selectedKey]);
 

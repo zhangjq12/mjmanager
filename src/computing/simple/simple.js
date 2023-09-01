@@ -27,6 +27,7 @@ export const simpleComputing = (players, isStart, isGameStart) => {
   let data = [];
   let allEnd = false;
   let gameStart = isGameStart;
+  let finalRes;
 
   if (isStart) {
     const pos = setPosition(players);
@@ -38,10 +39,10 @@ export const simpleComputing = (players, isStart, isGameStart) => {
       `东风位：${seats.e} 南风位：${seats.s} 西风位：${seats.w} 北风位：${seats.n}`
     );
     points = {
-      [pos.e]: 25000,
-      [pos.s]: 25000,
-      [pos.w]: 25000,
-      [pos.n]: 25000,
+      [pos.e]: reachMj.yuandian,
+      [pos.s]: reachMj.yuandian,
+      [pos.w]: reachMj.yuandian,
+      [pos.n]: reachMj.yuandian,
     };
     xiangting = {
       [pos.e]: 14,
@@ -120,6 +121,16 @@ export const simpleComputing = (players, isStart, isGameStart) => {
         data.push(
           `本场结束 总排名：第一位：${rank[0].name} 第二位：${rank[1].name} 第三位：${rank[2].name} 第四位：${rank[3].name} `
         );
+        let pts = [0, 0, 0, 0];
+        for (let index = 1; index < pts.length; index++) {
+          pts[index] =
+            Math.round(
+              ((rank[index].points - reachMj.fandian) / 1000 +
+                reachMj.madian[index + 1]) *
+                10
+            ) / 10;
+        }
+        pts[0] = Math.round((-(pts[1] + pts[2] + pts[3])) * 10) / 10;
         allEnd = true;
         points = {};
         xiangting = {};
@@ -136,6 +147,19 @@ export const simpleComputing = (players, isStart, isGameStart) => {
           w: false,
           s: false,
         };
+        finalRes = {
+          gameName: "",
+          gameDate: "",
+          results: [],
+        };
+        for (const key in rank) {
+          finalRes.results.push({
+            id: getPlayerDetail(rank[key].name, players).id,
+            name: rank[key].name,
+            score: rank[key].points,
+            pt: pts[key],
+          });
+        }
       } else {
         xunNumber++;
         if (xunNumber > 17) {
@@ -255,9 +279,10 @@ export const simpleComputing = (players, isStart, isGameStart) => {
   }
 
   return {
-    data: data,
+    data,
     isGameStart: gameStart,
-    allEnd: allEnd,
+    allEnd,
+    finalRes,
   };
 };
 
@@ -428,7 +453,9 @@ const getHupai = (pos, players) => {
         benchang * reachMj.benchang +
         lizhibang * reachMj.lizhibang;
       for (let key in points) {
-        points[key] -= Math.ceil(personalPoint / 100) * 100 + Math.round((benchang * reachMj.benchang) / 3);
+        points[key] -=
+          Math.ceil(personalPoint / 100) * 100 +
+          Math.round((benchang * reachMj.benchang) / 3);
       }
       benchang = 0;
       points[seats.e] +=

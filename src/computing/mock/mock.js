@@ -1,12 +1,3 @@
-export let mockData = [];
-
-export const generateMock = () => {
-  if (mockData.length === 30) {
-    return;
-  }
-  mockData.push(Math.random() * 100);
-};
-
 export const mockChar = [
   {
     id: 1,
@@ -18,6 +9,9 @@ export const mockChar = [
     determination: 70,
     injury: false,
     period: 0,
+    ca: 40,
+    pa: 70,
+    team: '',
   },
   {
     id: 2,
@@ -29,6 +23,9 @@ export const mockChar = [
     determination: 50,
     injury: false,
     period: 0,
+    ca: 53,
+    pa: 80,
+    team: '',
   },
   {
     id: 3,
@@ -40,6 +37,9 @@ export const mockChar = [
     determination: 60,
     injury: false,
     period: 0,
+    ca: 40,
+    pa: 75,
+    team: '',
   },
   {
     id: 4,
@@ -51,6 +51,9 @@ export const mockChar = [
     determination: 30,
     injury: false,
     period: 0,
+    ca: 40,
+    pa: 65,
+    team: '',
   },
   {
     id: 5,
@@ -62,6 +65,9 @@ export const mockChar = [
     determination: 70,
     injury: false,
     period: 0,
+    ca: 30,
+    pa: 50,
+    team: '',
   },
   {
     id: 6,
@@ -73,6 +79,9 @@ export const mockChar = [
     determination: 80,
     injury: false,
     period: 0,
+    ca: 33,
+    pa: 70,
+    team: '',
   },
   {
     id: 7,
@@ -84,6 +93,9 @@ export const mockChar = [
     determination: 90,
     injury: false,
     period: 0,
+    ca: 50,
+    pa: 70,
+    team: '',
   },
   {
     id: 8,
@@ -95,6 +107,9 @@ export const mockChar = [
     determination: 20,
     injury: false,
     period: 0,
+    ca: 13,
+    pa: 60,
+    team: '',
   },
   {
     id: 9,
@@ -106,6 +121,9 @@ export const mockChar = [
     determination: 80,
     injury: false,
     period: 0,
+    ca: 53,
+    pa: 70,
+    team: '',
   },
   {
     id: 10,
@@ -117,6 +135,9 @@ export const mockChar = [
     determination: 60,
     injury: false,
     period: 0,
+    ca: 67,
+    pa: 80,
+    team: '',
   },
   {
     id: 11,
@@ -128,6 +149,9 @@ export const mockChar = [
     determination: 50,
     injury: false,
     period: 0,
+    ca: 40,
+    pa: 60,
+    team: '',
   },
   {
     id: 12,
@@ -139,5 +163,8 @@ export const mockChar = [
     determination: 10,
     injury: false,
     period: 0,
+    ca: 10,
+    pa: 40,
+    team: '',
   },
 ];
