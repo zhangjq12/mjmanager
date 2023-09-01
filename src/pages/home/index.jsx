@@ -127,7 +127,7 @@ export const Home = ({ originData }) => {
       if (originData.calendar[originData.date] && originData.match) {
         setCharsInvited(Object.keys(originData.match));
         setMatchPlayers(originData.match);
-        setContinueButton("进行比赛")
+        setContinueButton("进行比赛");
       }
     }
 
@@ -281,6 +281,11 @@ export const Home = ({ originData }) => {
     await processing(thisDay, res);
   };
 
+  const onRestart = () => {
+    localStorage.clear();
+    window.location.reload();
+  };
+
   const menuNode = [
     {
       key: 1,
@@ -399,7 +404,12 @@ export const Home = ({ originData }) => {
             alignItems: "center",
           }}
         >
-          <div className="demo-logo">麻将经理人</div>
+          <div className="demo-logo">
+            麻将经理人{" "}
+            <Button type="primary" onClick={onRestart}>
+              重开档
+            </Button>
+          </div>
           <Menu
             theme="dark"
             mode="horizontal"
