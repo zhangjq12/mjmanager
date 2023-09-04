@@ -400,40 +400,51 @@ export const Home = ({ originData }) => {
       <Layout className="layout">
         <Header
           style={{
-            display: "flex",
-            alignItems: "center",
+            height: window.innerWidth <= 576 ? "128px" : "64px",
           }}
+          // style={{
+          //   display: "flex",
+          //   alignItems: "center",
+          // }}
         >
-          <div className="demo-logo">
-            麻将经理人{" "}
-            <Button type="primary" onClick={onRestart}>
-              重开档
-            </Button>
-          </div>
-          <Menu
-            theme="dark"
-            mode="horizontal"
-            defaultSelectedKeys={["1"]}
-            items={menuNode}
-            onClick={(info) => {
-              setMenuKeys(parseInt(info.key));
-            }}
-          />
-          <div className="right-button">
-            <div
-              style={{ padding: "0 10px", color: "white" }}
-              onClick={() => {
-                setDrawerTitle("未来日程");
-                setDrawerClosable(true);
-                setDrawerOpen(true);
-              }}
-            >
-              今日日期：{today}
-            </div>
-            <Button type="primary" onClick={onContinueGame}>
-              {continueButton}
-            </Button>
-          </div>
+          <Row>
+            <Col xs={24} sm={24} md={6}>
+              <div className="demo-logo">
+                麻将经理人{" "}
+                <Button type="primary" onClick={onRestart}>
+                  重开档
+                </Button>
+              </div>
+            </Col>
+            <Col xs={4} sm={4} md={12}>
+              <Menu
+                theme="dark"
+                mode="horizontal"
+                defaultSelectedKeys={["1"]}
+                items={menuNode}
+                onClick={(info) => {
+                  setMenuKeys(parseInt(info.key));
+                }}
+              />
+            </Col>
+            <Col xs={20} sm={20} md={6}>
+              <div className="right-button">
+                <div
+                  style={{ padding: "0 5px", color: "white" }}
+                  onClick={() => {
+                    setDrawerTitle("未来日程");
+                    setDrawerClosable(true);
+                    setDrawerOpen(true);
+                  }}
+                >
+                  今日日期：{today}
+                </div>
+                <Button type="primary" onClick={onContinueGame}>
+                  {continueButton}
+                </Button>
+              </div>
+            </Col>
+          </Row>
         </Header>
         <Content
           style={{

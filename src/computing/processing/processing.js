@@ -48,21 +48,27 @@ export const continueGame = async (
     );
 
     const standings = standingsMap.get(calendar[prevDay]);
-    Object.keys(gameResults.results).forEach((v) => {
-      if (v !== "otherGames") {
-        gameResults.results[v].forEach((r) => {
-          if (standings[r.id] === undefined) standings[r.id] = 0;
-          standings[r.id] += r.pt;
-        });
-      } else {
-        gameResults.results[v].forEach((arr) => {
-          arr.forEach((a) => {
-            if (standings[a.id] === undefined) standings[a.id] = 0;
-            standings[a.id] += a.pt;
-          });
-        });
-      }
+    gameResults.allGames.forEach((v) => {
+      v.forEach((r) => {
+        if (standings[r.id] === undefined) standings[r.id] = 0;
+        standings[r.id] += r.pt;
+      });
     });
+    // Object.keys(gameResults.results).forEach((v) => {
+    //   if (v !== "otherGames") {
+    //     gameResults.results[v].forEach((r) => {
+    //       if (standings[r.id] === undefined) standings[r.id] = 0;
+    //       standings[r.id] += r.pt;
+    //     });
+    //   } else {
+    //     gameResults.results[v].forEach((arr) => {
+    //       arr.forEach((a) => {
+    //         if (standings[a.id] === undefined) standings[a.id] = 0;
+    //         standings[a.id] += a.pt;
+    //       });
+    //     });
+    //   }
+    // });
     standingsMap.change(standings, calendar[prevDay]);
   }
 
@@ -318,6 +324,7 @@ const processGame = async (
       gameName: calendar[today],
       gameDate: today,
       results: { otherGames: [] },
+      allGames: [],
     };
     for (const match of schedule[calendar[today]][today]) {
       let boo = false;
@@ -346,6 +353,7 @@ const processGame = async (
         } else {
           gameRes.results["otherGames"].push(matchRes.results);
         }
+        gameRes.allGames.push(matchRes.results);
       } else {
         gameRes.results[charWatched] = singleGameRes.results;
         for (const player of match) {
@@ -358,6 +366,7 @@ const processGame = async (
             }
           }
         }
+        gameRes.allGames.push(singleGameRes.results);
       }
     }
     return gameRes;
@@ -366,6 +375,7 @@ const processGame = async (
       gameName: calendar[today],
       gameDate: today,
       results: { otherGames: [] },
+      allGames: [],
     };
     for (const match of schedule[calendar[today]][today]) {
       let charboo = [];
@@ -384,10 +394,11 @@ const processGame = async (
       if (charboo.length > 0) {
         charboo.forEach((v) => {
           gameRes.results[v] = matchRes.results;
-        })
+        });
       } else {
         gameRes.results["otherGames"].push(matchRes.results);
       }
+      gameRes.allGames.push(matchRes.results);
     }
     return gameRes;
   }

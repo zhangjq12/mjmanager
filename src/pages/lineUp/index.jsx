@@ -1,5 +1,5 @@
 import EChartsReact from "echarts-for-react";
-import { Card, Layout, Row, Col } from "antd";
+import { Card, Layout, Row, Col, Rate } from "antd";
 
 const { Meta } = Card;
 const { Content } = Layout;
@@ -34,6 +34,7 @@ export const LineUp = ({ players }) => {
       series: [
         {
           type: "radar",
+          center: ["50%", "50%"],
           data: [
             {
               value: [v.attack, v.defense, v.speed, v.lucky, v.determination],
@@ -45,10 +46,10 @@ export const LineUp = ({ players }) => {
     };
 
     return (
-      <Col key={i} span={8}>
+      <Col key={i} xs={24} sm={24} md={12} lg={8}>
         <Card
           hoverable
-          style={{ width: 300 }}
+          style={{ width: 250 }}
           cover={
             <EChartsReact
               option={option}
@@ -56,7 +57,21 @@ export const LineUp = ({ players }) => {
             />
           }
         >
-          <Meta title={v.name} />
+          <Meta
+            title={v.name}
+            description={
+              <div>
+                <div>
+                  能力值：
+                  <Rate allowHalf disabled value={v.ca / 20} />
+                </div>
+                <div>
+                  潜力值：
+                  <Rate allowHalf disabled value={v.pa / 20} />
+                </div>
+              </div>
+            }
+          />
         </Card>
       </Col>
     );
