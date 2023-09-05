@@ -1,5 +1,6 @@
 import { makeAutoObservable } from "mobx";
-import { initialStandings } from "./initial";
+// import { initialStandings } from "./initial";
+import { scheduleGenerator } from "../schedule/schedule";
 
 // export const standingMap = {
 //   立直麻将联赛: ReachMjStandings,
@@ -15,7 +16,7 @@ class Standings {
 
   init(standings) {
     if (!standings) return;
-    initialStandings.forEach((s) => {
+    scheduleGenerator.getMatchNames().forEach((s) => {
       this.standingMap[s] = standings[s];
     });
   }
@@ -26,6 +27,10 @@ class Standings {
 
   get(league) {
     return this.standingMap[league];
+  }
+
+  getMap() {
+    return this.standingMap;
   }
 }
 

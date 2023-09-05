@@ -7,13 +7,14 @@ import {
   Col,
   Descriptions,
   message,
+  Spin,
 } from "antd";
 import "./index.css";
 import { mockChar } from "../../computing/mock/mock";
 
 const { Header, Content, Footer } = Layout;
 
-export const StartPage = ({ callback }) => {
+export const StartPage = ({ callback, loading }) => {
   const [chars, setChars] = useState([]);
   const [names, setNames] = useState([]);
   const [descriptions, setDescriptions] = useState([]);
@@ -37,8 +38,8 @@ export const StartPage = ({ callback }) => {
   }, []);
 
   const onClick = () => {
-    if (names.length === 3) callback(names);
-    else message.error("要选够3人开始");
+    if (names.length === 4) callback(names);
+    else message.error("要选够4人开始");
   };
 
   const checkboxChange = (arr) => {
@@ -105,7 +106,7 @@ export const StartPage = ({ callback }) => {
         <Row>
           <Col>
             <Button onClick={onClick} type="primary">
-              进入游戏
+              {loading ? <Spin /> : <>进入游戏</>}
             </Button>
           </Col>
         </Row>

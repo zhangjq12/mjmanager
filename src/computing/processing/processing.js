@@ -47,7 +47,7 @@ export const continueGame = async (
       playersMap
     );
 
-    const standings = standingsMap.get(calendar[prevDay]);
+    const standings = standingsMap.get(calendar[prevDay].split(' '));
     gameResults.allGames.forEach((v) => {
       v.forEach((r) => {
         if (standings[r.id] === undefined) standings[r.id] = 0;

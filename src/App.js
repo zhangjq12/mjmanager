@@ -4,13 +4,15 @@ import "./App.css";
 import { Home } from "./pages/home";
 import { StartPage } from "./pages/start";
 import { mockChar } from "./computing/mock/mock";
-import { Calendar, Schedule } from "./computing/mock/calendar";
-import { StandingsMock } from "./computing/mock/standings";
+import { scheduleGenerator } from "./data/schedule/schedule";
+import { initSchedule } from "./computing/schedule/schedule";
+import { observer } from "mobx-react-lite";
 // import { Match } from "./pages/match";
 
 function App() {
   // const [chars, setChars] = useState([]);
   const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
   // const callback = (chars) => {
   //   setChars(chars);
   //   setPage(2);
@@ -31,30 +33,60 @@ function App() {
     }
   }, []);
 
-  const callback = (res) => {
-    const originData = {
-      players: mockChar,
-      mails: [
-        {
-          key: 1,
-          label: "欢迎",
-          read: true,
-          content: "欢迎来到麻将经理人",
-        },
-      ],
-      teamMembers: res,
-      date: "2023/8/31",
-      calendar: Calendar,
-      schedule: Schedule,
-      standings: StandingsMock,
-    };
+  const callback = async (res) => {
+    setLoading(true);
+    const originData = await initGame(res);
+    setLoading(false);
     setData(originData);
     setPage(2);
   };
 
+  const initGame = async (res) => {
+    return new Promise((resolve) => {
+      const StandingsInit = {};
+      const players = mockChar;
+
+      initSchedule(players, "2023/8/31");
+
+      const standingIsShow = {};
+      scheduleGenerator.getMatchNames().forEach((s) => {
+        const standing = {};
+        players.forEach((p) => {
+          standing[p.id] = 0;
+        });
+
+        if (!standingIsShow[s[0]]) {
+          standingIsShow[s[0]] = 1;
+          StandingsInit[s] = standing;
+        }
+      });
+
+      const originData = {
+        players,
+        mails: [
+          {
+            key: 1,
+            label: "欢迎",
+            read: true,
+            content: "欢迎来到麻将经理人",
+          },
+        ],
+        teamMembers: res,
+        date: "2023/8/31",
+        calendar: scheduleGenerator.getCalendar(),
+        schedule: scheduleGenerator.getAll(),
+        standings: StandingsInit,
+      };
+
+      resolve(originData);
+    });
+  };
+
   return (
     <div className="App">
-      {page === 1 && <StartPage callback={callback} />}
+      {/* <Spin tip="加载游戏中..." spinning={loading}> */}
+        {page === 1 && <StartPage callback={callback} loading={loading}/>}
+      {/* </Spin> */}
       {page === 2 && <Home originData={data} />}
       {/* {page === 1 && <Demo callback={callback} />}
       {page === 2 && <Match chars={chars} endCallback={endCallback}/>} */}
@@ -62,4 +94,4 @@ function App() {
   );
 }
 
-export default App;
+export default observer(App);
