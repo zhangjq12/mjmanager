@@ -98,8 +98,15 @@ class Schedule {
     }
   }
 
-  setCupRivals(league, date, standings) {
-    if (!this.getNextMatchDate(league, date)) return;
+  load(calendar, schedule) {
+    this.schedule = schedule;
+    this.calendar = calendar;
+    this.matchNames = Object.keys(schedule).map((v) => v.split(" "));
+  }
+
+  setCupRivals(league, standings) {
+    const { league: newLeague, date } = this.getNextCupMatch(league);
+    if (!newLeague) return;
 
     let table = Object.keys(standings).map((key) => {
       return {
@@ -118,17 +125,46 @@ class Schedule {
     } else {
       table.splice(-len / 2);
     }
-    this.schedule[league][this.getNextMatchDate(league, date)] =
-      generateCupRound(table.map((v) => v.key));
+    const schedule = this.schedule;
+    schedule[newLeague][date] = generateCupRound(table.map((v) => parseInt(v.key)));
+
+    this.schedule = schedule;
+    return {
+      res: table.map((v) => {
+        return { key: v.key, value: 0 };
+      }),
+      league: newLeague,
+    };
   }
 
-  getNextMatchDate(league, date) {
-    const dates = Object.keys(this.schedule[league]);
-    for (const d of dates) {
-      if (new Date(d).getDate() > new Date(date).getDate()) {
-        return d;
+  getNextCupMatch(league) {
+    const [leagueName] = league.split(" ");
+    const leagueDate = Object.keys(this.calendar).find(
+      (v) => this.calendar[v] === league
+    );
+    if (leagueName) {
+      const keys = Object.keys(this.calendar).filter(
+        (v) => this.calendar[v].indexOf(leagueName) > -1
+      );
+      let thisKey;
+      let date = new Date(leagueDate).getTime() + 365 * 24 * 60 * 60 * 1000;
+      for (const key of keys) {
+        if (
+          new Date(key).getTime() > new Date(leagueDate).getTime() &&
+          new Date(date).getTime() > new Date(key).getTime()
+        ) {
+          thisKey = key;
+          date = new Date(key).getTime();
+        }
       }
+      return { league: this.calendar[thisKey], date: thisKey };
     }
+    // const dates = Object.keys(this.schedule[league]);
+    // for (const d of dates) {
+    //   if (new Date(d).getDate() > new Date(date).getDate()) {
+    //     return d;
+    //   }
+    // }
     return;
   }
 

@@ -6,7 +6,6 @@ import { StartPage } from "./pages/start";
 import { mockChar } from "./computing/mock/mock";
 import { scheduleGenerator } from "./data/schedule/schedule";
 import { initSchedule } from "./computing/schedule/schedule";
-import { observer } from "mobx-react-lite";
 // import { Match } from "./pages/match";
 
 function App() {
@@ -29,6 +28,7 @@ function App() {
     } else {
       originData = JSON.parse(originData);
       setData(originData);
+      scheduleGenerator.load(originData.calendar, originData.schedule);
       setPage(2);
     }
   }, []);
@@ -85,7 +85,7 @@ function App() {
   return (
     <div className="App">
       {/* <Spin tip="加载游戏中..." spinning={loading}> */}
-        {page === 1 && <StartPage callback={callback} loading={loading}/>}
+      {page === 1 && <StartPage callback={callback} loading={loading} />}
       {/* </Spin> */}
       {page === 2 && <Home originData={data} />}
       {/* {page === 1 && <Demo callback={callback} />}
@@ -94,4 +94,4 @@ function App() {
   );
 }
 
-export default observer(App);
+export default App;

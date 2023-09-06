@@ -105,7 +105,7 @@ export const StartPage = ({ callback, loading }) => {
         </Row>
         <Row>
           <Col>
-            <Button onClick={onClick} type="primary">
+            <Button onClick={onClick} type="primary" disabled={loading}>
               {loading ? <Spin /> : <>进入游戏</>}
             </Button>
           </Col>

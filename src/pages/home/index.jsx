@@ -22,6 +22,8 @@ import { continueGame } from "../../computing/processing/processing";
 import { Match } from "../match";
 // import { StandingsMock } from "../../computing/mock/standings";
 import { standingsMap } from "../../data/standings/standings";
+import { observer } from "mobx-react-lite";
+import { scheduleGenerator } from "../../data/schedule/schedule";
 
 const { Header, Content, Footer } = Layout;
 
@@ -65,7 +67,9 @@ const { Header, Content, Footer } = Layout;
 //   },
 // ];
 
-export const Home = ({ originData }) => {
+export const Home = observer(({ originData }) => {
+  const [schedules] = useState(() => scheduleGenerator);
+
   const [currentTime, setCurrentTime] = useState("");
   const [menuKeys, setMenuKeys] = useState(1);
   const [mailBadgeCount, setMailBadgeCount] = useState(0);
@@ -95,6 +99,11 @@ export const Home = ({ originData }) => {
   const [schedule, setSchedule] = useState({});
 
   useEffect(() => {
+    setCalendar(schedules.getCalendar());
+    setSchedule(schedules.getAll());
+  }, [schedules]);
+
+  useEffect(() => {
     const timer = setInterval(() => {
       const date = new Date();
       const thisDate = date.toLocaleDateString();
@@ -108,8 +117,6 @@ export const Home = ({ originData }) => {
       setPlayers(originData.players);
       setChars(originData.teamMembers);
       setToday(originData.date);
-      setCalendar(originData.calendar);
-      setSchedule(originData.schedule);
       standingsMap.init(originData.standings);
 
       const playersMap = {};
@@ -539,4 +546,4 @@ export const Home = ({ originData }) => {
       gameName={calendar[today]}
     />
   );
-};
+});

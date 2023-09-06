@@ -8,6 +8,8 @@ import {
 } from "./statics";
 import { simulatingGame } from "../simulating/simulating";
 import { standingsMap } from "../../data/standings/standings";
+import { initialStandings } from "../../data/standings/initial";
+import { scheduleGenerator } from "../../data/schedule/schedule";
 
 export const continueGame = async (
   players,
@@ -47,7 +49,7 @@ export const continueGame = async (
       playersMap
     );
 
-    const standings = standingsMap.get(calendar[prevDay].split(' '));
+    const standings = standingsMap.get(calendar[prevDay].split(" "));
     gameResults.allGames.forEach((v) => {
       v.forEach((r) => {
         if (standings[r.id] === undefined) standings[r.id] = 0;
@@ -69,7 +71,7 @@ export const continueGame = async (
     //     });
     //   }
     // });
-    standingsMap.change(standings, calendar[prevDay]);
+    standingsMap.change(standings, calendar[prevDay].split(" "));
   }
 
   const res = [];
@@ -126,7 +128,11 @@ export const continueGame = async (
   }
 
   if (gameResults) {
-    const postMatchMessage = postMatch(gameResults, playersMap);
+    const postMatchMessage = postMatch(
+      gameResults,
+      playersMap,
+      standingsMap.get(gameResults.gameName.split(" "))
+    );
 
     if (postMatchMessage) {
       res.push(postMatchMessage);
@@ -286,7 +292,25 @@ const preMatch = (chars, calendar, schedule, today, playersMap) => {
   };
 };
 
-const postMatch = (matchResult, playersMap) => {
+const postMatch = (matchResult, playersMap, standing) => {
+  let newStanding;
+  if (
+    initialStandings.find((v) => v.name === matchResult.gameName.split(" ")[0])
+      .type === "杯赛"
+  ) {
+    newStanding = scheduleGenerator.setCupRivals(
+      matchResult.gameName,
+      standing
+    );
+  }
+  if (newStanding) {
+    const standings = {};
+    newStanding.res.forEach((v) => {
+      standings[v.key] = v.value;
+    });
+    standingsMap.change(standings, newStanding.league.split(" "));
+  }
+
   if (matchResult) {
     return {
       title: `${matchResult.gameName} 比赛日结果`,
