@@ -6,6 +6,7 @@ import { StartPage } from "./pages/start";
 import { mockChar } from "./computing/mock/mock";
 import { scheduleGenerator } from "./data/schedule/schedule";
 import { initSchedule } from "./computing/schedule/schedule";
+import { randomTeam } from "./computing/team/team";
 // import { Match } from "./pages/match";
 
 function App() {
@@ -44,7 +45,7 @@ function App() {
   const initGame = async (res) => {
     return new Promise((resolve) => {
       const StandingsInit = {};
-      const players = mockChar;
+      const { players, char: chars } = randomTeam(res, mockChar);
 
       initSchedule(players, "2023/8/31");
 
@@ -71,7 +72,7 @@ function App() {
             content: "欢迎来到麻将经理人",
           },
         ],
-        teamMembers: res,
+        teamMembers: chars,
         date: "2023/8/31",
         calendar: scheduleGenerator.getCalendar(),
         schedule: scheduleGenerator.getAll(),

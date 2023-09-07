@@ -1,7 +1,8 @@
-import { Table, Layout, Cascader, Empty } from "antd";
+import { Table, Layout, Cascader, Empty, Select } from "antd";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import { scheduleGenerator } from "../../data/schedule/schedule";
+import { initialStandings } from "../../data/standings/initial";
 
 const { Content } = Layout;
 
@@ -22,6 +23,8 @@ export const Standings = observer(({ standings, playersMap }) => {
   const [isShowTable, setIsShowTable] = useState(true);
   const [table, setTable] = useState([]);
   const [league, setLeague] = useState(["立直麻将联赛"]);
+  const [isTeam, setIsTeam] = useState(false);
+  const [teamOrInd, setTeamOrInd] = useState(0);
   const [cascader, setCascader] = useState([]);
 
   useEffect(() => {
@@ -56,22 +59,44 @@ export const Standings = observer(({ standings, playersMap }) => {
   useEffect(() => {
     const standing = standings.get(league);
 
+    const isTeam = initialStandings.find((v) => league[0] === v.name)?.isTeam;
+    if (isTeam) setIsTeam(true);
+    else setIsTeam(false);
+
     if (standing) {
-      let table = Object.keys(standing).map((key) => {
-        return {
-          key,
-          name: playersMap[key].name,
-          pt: standing[key],
-        };
-      });
-      table = table.sort((a, b) => b.pt - a.pt);
+      let table;
+      if (teamOrInd === 0) {
+        table = Object.keys(standing).map((key) => {
+          return {
+            key,
+            name: playersMap[key].name,
+            pt: standing[key],
+          };
+        });
+        table = table.sort((a, b) => b.pt - a.pt);
+      } else {
+        const teamMap = {};
+        Object.keys(standing).forEach((key) => {
+          if (!teamMap[playersMap[key].team])
+            teamMap[playersMap[key].team] = standing[key];
+          else teamMap[playersMap[key].team] += standing[key];
+        });
+        table = Object.keys(teamMap).map((key) => {
+          return {
+            key,
+            name: key,
+            pt: teamMap[key],
+          };
+        });
+        table = table.sort((a, b) => b.pt - a.pt);
+      }
       setTable(table);
       setIsShowTable(true);
     } else {
       setIsShowTable(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [standings, league]);
+  }, [standings, league, teamOrInd]);
 
   const onSetLeagueChange = (v) => {
     setLeague(v);
@@ -90,12 +115,28 @@ export const Standings = observer(({ standings, playersMap }) => {
         id="standing-table-content"
         style={{ padding: "0 24px", minHeight: 280 }}
       >
-        <div style={{ marginLeft: "auto" }}>
-          <Cascader
-            options={cascader}
-            value={league}
-            onChange={onSetLeagueChange}
-          />
+        <div style={{ display: "flex" }}>
+          <div>
+            <Cascader
+              options={cascader}
+              value={league}
+              onChange={onSetLeagueChange}
+            />
+          </div>
+          {isTeam && (
+            <div style={{ marginLeft: "auto" }}>
+              <Select
+                value={teamOrInd}
+                options={[
+                  { label: "个人", value: 0 },
+                  { label: "队伍", value: 1 },
+                ]}
+                onChange={(v) => {
+                  setTeamOrInd(v);
+                }}
+              />
+            </div>
+          )}
         </div>
         {isShowTable ? (
           <Table

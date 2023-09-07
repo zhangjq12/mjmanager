@@ -32,14 +32,14 @@ class Schedule {
         );
         this.schedule[league] = schedule;
         for (const key in schedule) {
-          this.calendar[key] = league;
+          if (schedule[key].length !== 0) this.calendar[key] = league;
         }
       } else {
         const ids = [...id];
         const schedule = generateLeagues(ids, startDate, isTeam, isWeekend);
         this.schedule[league] = schedule;
         for (const key in schedule) {
-          this.calendar[key] = league;
+          if (schedule[key].length !== 0) this.calendar[key] = league;
         }
       }
       this.matchNames.push([league]);
@@ -126,7 +126,9 @@ class Schedule {
       table.splice(-len / 2);
     }
     const schedule = this.schedule;
-    schedule[newLeague][date] = generateCupRound(table.map((v) => parseInt(v.key)));
+    schedule[newLeague][date] = generateCupRound(
+      table.map((v) => parseInt(v.key))
+    );
 
     this.schedule = schedule;
     return {
