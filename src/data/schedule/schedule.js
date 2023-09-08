@@ -139,6 +139,27 @@ class Schedule {
     };
   }
 
+  getNextLeagueMatch(league, date) {
+    const [leagueName] = league.split(" ");
+    if (leagueName) {
+      const keys = Object.keys(this.calendar).filter(
+        (v) => this.calendar[v] === leagueName
+      );
+
+      let lastKey = 0;
+      for (const key of keys) {
+        if (
+          new Date(key).getTime() > new Date(date).getTime() &&
+          new Date(date).getTime() >= new Date(lastKey).getTime()
+        ) {
+          return { league: this.calendar[key], date: key };
+        }
+        lastKey = key;
+      }
+    }
+    return { league: undefined, date: undefined };
+  }
+
   getNextCupMatch(league) {
     const [leagueName] = league.split(" ");
     const leagueDate = Object.keys(this.calendar).find(

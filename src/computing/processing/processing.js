@@ -10,6 +10,7 @@ import { simulatingGame } from "../simulating/simulating";
 import { standingsMap } from "../../data/standings/standings";
 import { initialStandings } from "../../data/standings/initial";
 import { scheduleGenerator } from "../../data/schedule/schedule";
+import { initSchedule } from "../schedule/schedule";
 
 export const continueGame = async (
   players,
@@ -20,7 +21,8 @@ export const continueGame = async (
   playersMap,
   singleGameRes,
   charWatched,
-  charInvited
+  charInvited,
+  myTeam
 ) => {
   const p = players.map((v) => {
     if (v.injury && v.period > 0) {
@@ -139,8 +141,20 @@ export const continueGame = async (
     }
   }
 
+  const endMatch = endOfLeagueOrCup(calendar, prevDay, resP, myTeam);
+  let resPWA = resP;
+  if (endMatch) {
+    const { players: resPWAI, message: mesEnd } = endMatch;
+    resPWA = resPWAI;
+    res.push(mesEnd);
+  }
+
+  if (new Date(today).getMonth() === 7 && new Date(today).getDate() === 30) {
+    reinitSeason(players, today);
+  }
+
   return {
-    players: resP,
+    players: resPWA,
     messages: res,
     match,
   };
@@ -426,4 +440,164 @@ const processGame = async (
     }
     return gameRes;
   }
+};
+
+const endOfLeagueOrCup = (calendar, today, players, myTeam) => {
+  let nextDay;
+  if (!calendar[today]) return;
+
+  const leagueName = calendar[today].split(" ")[0];
+  let isCup = false;
+  if (initialStandings.find((v) => v.name === leagueName).type === "杯赛") {
+    nextDay = scheduleGenerator.getNextCupMatch(calendar[today]);
+    isCup = true;
+  } else {
+    nextDay = scheduleGenerator.getNextLeagueMatch(calendar[today], today);
+  }
+
+  if (!nextDay || nextDay.date === undefined) {
+    const prevYear =
+      new Date(today).getMonth() + 1 >= 9
+        ? new Date(today).getFullYear()
+        : new Date(today).getFullYear() - 1;
+    const year = [prevYear, prevYear + 1];
+
+    let resPlayers;
+
+    if (isCup) {
+      const cupNames = Object.values(scheduleGenerator.getCalendar()).filter(
+        (v) => v.indexOf(leagueName) > -1
+      );
+      let restKeys = {};
+      for (const name of cupNames) {
+        const cup = name.split(" ");
+        const standing = standingsMap.get(cup);
+        const table = Object.keys(standing).map((key) => {
+          return {
+            key,
+            pt: standing[key],
+          };
+        });
+        table.sort((a, b) => b.pt - a.pt);
+        const len = table.length;
+        let rests;
+        if (len > 32 && len < 64) {
+          rests = table.splice(-(len - 32));
+        } else if (len > 16 && len < 32) {
+          rests = table.splice(-(len - 16));
+        } else if (len > 8 && len < 16) {
+          rests = table.splice(-(len - 8));
+        } else if (len > 4 && len < 8) {
+          rests = table.splice(-(len - 4));
+        } else if (len <= 4) {
+          rests = table.slice(0);
+        } else {
+          rests = table.splice(-len / 2);
+        }
+
+        let i = 1;
+        for (const rest of rests) {
+          if (len > 4) {
+            restKeys[rest.key] = `前${len}强`;
+          } else {
+            restKeys[rest.key] = `第${i}名`;
+          }
+          i++;
+        }
+      }
+      resPlayers = players.map((v) => {
+        if (!v.achievment) v.achievment = {};
+        v.achievment[leagueName] = restKeys[v.id];
+        return v;
+      });
+    } else {
+      const standing = standingsMap.get([leagueName]);
+      const table = Object.keys(standing).map((key) => {
+        return {
+          key,
+          pt: standing[key],
+        };
+      });
+      table.sort((a, b) => b.pt - a.pt);
+
+      const keys = {};
+      let i = 1;
+      for (const t of table) {
+        keys[t.key] = `第${i}名`;
+        i++;
+      }
+
+      resPlayers = players.map((v) => {
+        if (!v.achievment) v.achievment = {};
+        v.achievment[leagueName] = keys[v.id];
+        return v;
+      });
+    }
+
+    const chars = resPlayers
+      .filter((v) => v.team === myTeam)
+      .map((v) => {
+        return {
+          name: v.name,
+          achievment: v.achievment[leagueName],
+        };
+      });
+
+    return {
+      players: resPlayers,
+      message: {
+        title: `${calendar[today].split(" ")[0]} 赛事总结`,
+        content: `${year[0]}-${
+          year[1]
+        }赛季的 ${leagueName} 落下帷幕。参加该比赛的选手成绩如下：
+        ${chars
+          .filter((v) => v.achievment)
+          .map((v) => {
+            return `${v.name}：${v.achievment}`;
+          })}`,
+      },
+    };
+  }
+};
+
+// const endOfSeason = (today, char) => {
+//   if (
+//     new Date(today).getMonth() === new Date("8/30").getMonth() &&
+//     new Date(today).getDate() === new Date("8/30").getDate()
+//   ) {
+//     const year = [
+//       new Date(today).getFullYear() - 1,
+//       new Date(today).getFullYear(),
+//     ];
+//     return {
+//       title: "赛季结束总结",
+//       content: `${year[0]}-${year[1]}赛季的比赛落下帷幕，`,
+//     };
+//   }
+// };
+
+const reinitSeason = (players, today) => {
+  const StandingsInit = {};
+
+  initSchedule(players, today);
+
+  const standingIsShow = {};
+  scheduleGenerator.getMatchNames().forEach((s) => {
+    const standing = {};
+    players.forEach((p) => {
+      standing[p.id] = 0;
+    });
+
+    if (!standingIsShow[s[0]]) {
+      standingIsShow[s[0]] = 1;
+      StandingsInit[s] = standing;
+    }
+  });
+
+  standingsMap.init(StandingsInit);
+
+  return {
+    title: "新赛季即将开始",
+    content: "",
+  };
 };

@@ -12,6 +12,7 @@ export const mockChar = [
     ca: 40,
     pa: 70,
     team: '',
+    achievment: {},
   },
   {
     id: 2,
@@ -26,6 +27,7 @@ export const mockChar = [
     ca: 53,
     pa: 80,
     team: '',
+    achievment: {},
   },
   {
     id: 3,
@@ -40,6 +42,7 @@ export const mockChar = [
     ca: 40,
     pa: 75,
     team: '',
+    achievment: {},
   },
   {
     id: 4,
@@ -54,6 +57,7 @@ export const mockChar = [
     ca: 40,
     pa: 65,
     team: '',
+    achievment: {},
   },
   {
     id: 5,
@@ -68,6 +72,7 @@ export const mockChar = [
     ca: 30,
     pa: 50,
     team: '',
+    achievment: {},
   },
   {
     id: 6,
@@ -82,6 +87,7 @@ export const mockChar = [
     ca: 33,
     pa: 70,
     team: '',
+    achievment: {},
   },
   {
     id: 7,
@@ -96,6 +102,7 @@ export const mockChar = [
     ca: 50,
     pa: 70,
     team: '',
+    achievment: {},
   },
   {
     id: 8,
@@ -110,6 +117,7 @@ export const mockChar = [
     ca: 13,
     pa: 60,
     team: '',
+    achievment: {},
   },
   {
     id: 9,
@@ -124,6 +132,7 @@ export const mockChar = [
     ca: 53,
     pa: 70,
     team: '',
+    achievment: {},
   },
   {
     id: 10,
@@ -138,6 +147,7 @@ export const mockChar = [
     ca: 67,
     pa: 80,
     team: '',
+    achievment: {},
   },
   {
     id: 11,
@@ -152,6 +162,7 @@ export const mockChar = [
     ca: 40,
     pa: 60,
     team: '',
+    achievment: {},
   },
   {
     id: 12,
@@ -166,6 +177,7 @@ export const mockChar = [
     ca: 10,
     pa: 40,
     team: '',
+    achievment: {},
   },
   {
     id: 13,
@@ -180,6 +192,7 @@ export const mockChar = [
     ca: 60,
     pa: 85,
     team: '',
+    achievment: {},
   },
   {
     id: 14,
@@ -194,6 +207,7 @@ export const mockChar = [
     ca: 43,
     pa: 85,
     team: '',
+    achievment: {},
   },
   {
     id: 15,
@@ -208,6 +222,7 @@ export const mockChar = [
     ca: 40,
     pa: 60,
     team: '',
+    achievment: {},
   },
   {
     id: 16,
@@ -222,5 +237,6 @@ export const mockChar = [
     ca: 50,
     pa: 75,
     team: '',
+    achievment: {},
   },
 ];

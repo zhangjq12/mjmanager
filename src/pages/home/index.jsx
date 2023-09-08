@@ -77,6 +77,7 @@ export const Home = observer(({ originData }) => {
   const [playersMap, setPlayersMap] = useState({});
   const [chars, setChars] = useState([]);
   const [today, setToday] = useState("");
+  const [myTeam, setMyTeam] = useState("立直魔术师");
 
   const [originMailData, setOriginMailData] = useState([]);
   const [mailData, setMailData] = useState([]);
@@ -116,6 +117,7 @@ export const Home = observer(({ originData }) => {
     if (originData) {
       setPlayers(originData.players);
       setChars(originData.teamMembers);
+      setMyTeam(originData.teamMembers[0].team);
       setToday(originData.date);
       standingsMap.init(originData.standings);
 
@@ -222,7 +224,8 @@ export const Home = observer(({ originData }) => {
       playersMap,
       singleGameRes,
       charWatched,
-      charInvited
+      charInvited,
+      myTeam
     );
     setPlayers(newP);
 
