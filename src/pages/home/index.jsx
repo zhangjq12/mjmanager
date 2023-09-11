@@ -227,7 +227,9 @@ export const Home = observer(({ originData }) => {
       charInvited,
       myTeam
     );
+    const newChar = newP.filter((v) => chars.find((c) => c.id === v.id))
     setPlayers(newP);
+    setChars(newChar);
 
     if (messages.length > 0) {
       const newMailData = [...mailData];

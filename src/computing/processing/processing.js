@@ -1,4 +1,4 @@
-import { weightRand } from "../simple/simple";
+import { weightRand } from "../simple/utils";
 import {
   ADVANTURES_NAMES,
   ADVANTURES_PROPERTY,
@@ -52,12 +52,24 @@ export const continueGame = async (
     );
 
     const standings = standingsMap.get(calendar[prevDay].split(" "));
+    const pMap = {};
     gameResults.allGames.forEach((v) => {
       v.forEach((r) => {
         if (standings[r.id] === undefined) standings[r.id] = 0;
         standings[r.id] += r.pt;
+        pMap[r.id] = r.statistics;
       });
     });
+
+    for (let i = 0; i < pM.length; i++) {
+      if (pMap[i + 1]) {
+        for (const key in pM[i].statistics) {
+          if (typeof pM[i].statistics[key] === "number")
+            pM[i].statistics[key] += pMap[i + 1][key];
+          else pM[i].statistics[key].push(...pMap[i + 1][key]);
+        }
+      }
+    }
     // Object.keys(gameResults.results).forEach((v) => {
     //   if (v !== "otherGames") {
     //     gameResults.results[v].forEach((r) => {
@@ -507,7 +519,7 @@ const endOfLeagueOrCup = (calendar, today, players, myTeam) => {
       }
       resPlayers = players.map((v) => {
         if (!v.achievment) v.achievment = {};
-        v.achievment[leagueName] = restKeys[v.id];
+        v.achievment[`${leagueName} ${year[0]}-${year[1]}`] = restKeys[v.id];
         return v;
       });
     } else {
@@ -529,7 +541,7 @@ const endOfLeagueOrCup = (calendar, today, players, myTeam) => {
 
       resPlayers = players.map((v) => {
         if (!v.achievment) v.achievment = {};
-        v.achievment[leagueName] = keys[v.id];
+        v.achievment[`${leagueName} ${year[0]}-${year[1]}`] = keys[v.id];
         return v;
       });
     }
@@ -539,7 +551,7 @@ const endOfLeagueOrCup = (calendar, today, players, myTeam) => {
       .map((v) => {
         return {
           name: v.name,
-          achievment: v.achievment[leagueName],
+          achievment: v.achievment[`${leagueName} ${year[0]}-${year[1]}`],
         };
       });
 

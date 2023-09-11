@@ -61,7 +61,10 @@ export const Standings = observer(({ standings, playersMap }) => {
 
     const isTeam = initialStandings.find((v) => league[0] === v.name)?.isTeam;
     if (isTeam) setIsTeam(true);
-    else setIsTeam(false);
+    else {
+      setIsTeam(false);
+      setTeamOrInd(0);
+    }
 
     if (standing) {
       let table;
@@ -70,7 +73,7 @@ export const Standings = observer(({ standings, playersMap }) => {
           return {
             key,
             name: playersMap[key].name,
-            pt: standing[key],
+            pt: standing[key].toFixed(1),
           };
         });
         table = table.sort((a, b) => b.pt - a.pt);
@@ -85,7 +88,7 @@ export const Standings = observer(({ standings, playersMap }) => {
           return {
             key,
             name: key,
-            pt: teamMap[key],
+            pt: teamMap[key].toFixed(1),
           };
         });
         table = table.sort((a, b) => b.pt - a.pt);

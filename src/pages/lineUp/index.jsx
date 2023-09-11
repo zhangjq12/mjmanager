@@ -1,10 +1,22 @@
 import EChartsReact from "echarts-for-react";
 import { Card, Layout, Row, Col, Rate } from "antd";
+import { PlayerDetail } from "../playerDetails";
+import { useState } from "react";
 
 const { Meta } = Card;
 const { Content } = Layout;
 
 export const LineUp = ({ players }) => {
+  const [char, setChar] = useState(players[0]);
+  const [chartOption, setChartOption] = useState();
+  const [openDetail, setOpenDetail] = useState(false);
+
+  const cardClick = (char, option) => {
+    setChar(char);
+    setChartOption(option);
+    setOpenDetail(true);
+  };
+
   const cardNode = players.map((v, i) => {
     const option = {
       radar: {
@@ -56,6 +68,9 @@ export const LineUp = ({ players }) => {
               style={{ height: "100%", maxHeight: "700px" }}
             />
           }
+          onClick={() => {
+            cardClick(v, option);
+          }}
         >
           <Meta
             title={v.name}
@@ -76,21 +91,32 @@ export const LineUp = ({ players }) => {
       </Col>
     );
   });
+
   return (
-    <Layout
-      style={{
-        padding: "24px 0",
-        background: "white",
-        height: "100%",
-        minHeight: 280,
-      }}
-    >
-      <Content
-        id="standing-table-content"
-        style={{ padding: "0 24px", minHeight: 280 }}
+    <>
+      <Layout
+        style={{
+          padding: "24px 0",
+          background: "white",
+          height: "100%",
+          minHeight: 280,
+        }}
       >
-        <Row>{cardNode}</Row>
-      </Content>
-    </Layout>
+        <Content
+          id="standing-table-content"
+          style={{ padding: "0 24px", minHeight: 280 }}
+        >
+          <Row>{cardNode}</Row>
+        </Content>
+      </Layout>
+      <PlayerDetail
+        char={char}
+        chartOptions={chartOption}
+        open={openDetail}
+        onClose={() => {
+          setOpenDetail(false);
+        }}
+      />
+    </>
   );
 };

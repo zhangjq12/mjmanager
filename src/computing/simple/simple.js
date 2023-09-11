@@ -1,4 +1,5 @@
 import { reachMj } from "../rules/rules";
+import { weightRand } from "./utils";
 
 let xunNumber = 0;
 let xiangting = {};
@@ -17,6 +18,7 @@ let isTingpai = {
   w: false,
   n: false,
 };
+let statistics = {};
 let gameFeng = "e";
 let gameNumber = 0;
 let benchang = 0;
@@ -50,6 +52,60 @@ export const simpleComputing = (players, isStart, isGameStart) => {
       [pos.w]: 14,
       [pos.n]: 14,
     };
+    statistics = {
+      [pos.e]: {
+        fulu: 0,
+        lizhi: 0,
+        points: [],
+        fangchong: 0,
+        zimo: 0,
+        ronghu: 0,
+        xunshu: [],
+        lianzhuang: 0,
+        weici: 0,
+        changci: 0,
+        jushu: 0,
+      },
+      [pos.s]: {
+        fulu: 0,
+        lizhi: 0,
+        points: [],
+        fangchong: 0,
+        zimo: 0,
+        ronghu: 0,
+        xunshu: [],
+        lianzhuang: 0,
+        weici: 0,
+        changci: 0,
+        jushu: 0,
+      },
+      [pos.w]: {
+        fulu: 0,
+        lizhi: 0,
+        points: [],
+        fangchong: 0,
+        zimo: 0,
+        ronghu: 0,
+        xunshu: [],
+        lianzhuang: 0,
+        weici: 0,
+        changci: 0,
+        jushu: 0,
+      },
+      [pos.n]: {
+        fulu: 0,
+        lizhi: 0,
+        points: [],
+        fangchong: 0,
+        zimo: 0,
+        ronghu: 0,
+        xunshu: [],
+        lianzhuang: 0,
+        weici: 0,
+        changci: 0,
+        jushu: 0,
+      },
+    };
   } else {
     if (gameStart) {
       data.push(
@@ -78,6 +134,9 @@ export const simpleComputing = (players, isStart, isGameStart) => {
             points[seats.n]
           } ${seats.s}：${points[seats.s]} ${seats.w}：${points[seats.w]} `
         );
+        for (const name in statistics) {
+          statistics[name].jushu++;
+        }
         gameStart = true;
         let newSeats = {
           e: seats.e,
@@ -130,7 +189,7 @@ export const simpleComputing = (players, isStart, isGameStart) => {
                 10
             ) / 10;
         }
-        pts[0] = Math.round((-(pts[1] + pts[2] + pts[3])) * 10) / 10;
+        pts[0] = Math.round(-(pts[1] + pts[2] + pts[3]) * 10) / 10;
         allEnd = true;
         points = {};
         xiangting = {};
@@ -152,13 +211,21 @@ export const simpleComputing = (players, isStart, isGameStart) => {
           gameDate: "",
           results: [],
         };
+        let i = 1;
         for (const key in rank) {
+          statistics[rank[key].name].weici = [i];
+          statistics[rank[key].name].changci = 1;
+          statistics[rank[key].name].lianzhuang = [
+            statistics[rank[key].name].lianzhuang,
+          ];
           finalRes.results.push({
             id: getPlayerDetail(rank[key].name, players).id,
             name: rank[key].name,
             score: rank[key].points,
             pt: pts[key],
+            statistics: statistics[rank[key].name],
           });
+          i++;
         }
       } else {
         xunNumber++;
@@ -169,28 +236,36 @@ export const simpleComputing = (players, isStart, isGameStart) => {
         } else {
           xiangting = getShoupai(xiangting, players);
           if (xiangting[seats.e] === 0 && !isTingpai.e) {
-            const tingpai = getTingpai();
+            const { data: tingpai, statistic } = getTingpai("e", players);
             if (tingpai === "立直听牌") points[seats.e] -= 1000;
             data.push(`第${xunNumber}巡 ${seats.e}听牌！${tingpai}！`);
             isTingpai.e = true;
+            statistics[seats.e].fulu += statistic.fulu;
+            statistics[seats.e].lizhi += statistic.lizhi;
           }
           if (xiangting[seats.n] === 0 && !isTingpai.n) {
-            const tingpai = getTingpai();
+            const { data: tingpai, statistic } = getTingpai("n", players);
             if (tingpai === "立直听牌") points[seats.n] -= 1000;
             data.push(`第${xunNumber}巡 ${seats.n}听牌！${tingpai}！`);
             isTingpai.n = true;
+            statistics[seats.n].fulu += statistic.fulu;
+            statistics[seats.n].lizhi += statistic.lizhi;
           }
           if (xiangting[seats.w] === 0 && !isTingpai.w) {
-            const tingpai = getTingpai();
+            const { data: tingpai, statistic } = getTingpai("w", players);
             if (tingpai === "立直听牌") points[seats.w] -= 1000;
             data.push(`第${xunNumber}巡 ${seats.w}听牌！${tingpai}！`);
             isTingpai.w = true;
+            statistics[seats.w].fulu += statistic.fulu;
+            statistics[seats.w].lizhi += statistic.lizhi;
           }
           if (xiangting[seats.s] === 0 && !isTingpai.s) {
-            const tingpai = getTingpai();
+            const { data: tingpai, statistic } = getTingpai("s", players);
             if (tingpai === "立直听牌") points[seats.s] -= 1000;
             data.push(`第${xunNumber}巡 ${seats.s}听牌！${tingpai}！`);
             isTingpai.s = true;
+            statistics[seats.s].fulu += statistic.fulu;
+            statistics[seats.s].lizhi += statistic.lizhi;
           }
           if (xiangting[seats.e] < 0) {
             if (xunNumber === 1) {
@@ -204,8 +279,24 @@ export const simpleComputing = (players, isStart, isGameStart) => {
               }
               benchang++;
               data.push(`${seats.e} 天和！48000点`);
+              statistics[seats.e].zimo += 1;
+              statistics[seats.e].points.push(48000);
+              statistics[seats.e].xunshu.push(xunNumber);
+              if (benchang >= 1 && statistics[seats.e].lianzhuang < benchang)
+                statistics[seats.e].lianzhuang = benchang;
             } else {
-              data.push(getHupai("e", players));
+              const { data: res, statistic } = getHupai("e", players);
+              data.push(res);
+              if (statistic.huWay === "荣和") {
+                statistics[seats.e].ronghu += 1;
+                statistics[seats[statistic.fangchong]].fangchong += 1;
+              } else {
+                statistics[seats.e].zimo += 1;
+              }
+              statistics[seats.e].points.push(statistic.point);
+              statistics[seats.e].xunshu.push(xunNumber);
+              if (benchang >= 1 && statistics[seats.e].lianzhuang < benchang)
+                statistics[seats.e].lianzhuang = benchang;
             }
             isGameEnd = true;
           } else if (xiangting[seats.n] < 0) {
@@ -221,8 +312,24 @@ export const simpleComputing = (players, isStart, isGameStart) => {
               points[seats.e] -= 8000;
               benchang = 0;
               data.push(`${seats.n} 地和！32000点`);
+              statistics[seats.n].zimo += 1;
+              statistics[seats.n].points.push(32000);
+              statistics[seats.n].xunshu.push(xunNumber);
+              if (benchang >= 1 && statistics[seats.n].lianzhuang < benchang)
+                statistics[seats.n].lianzhuang = benchang;
             } else {
-              data.push(getHupai("n", players));
+              const { data: res, statistic } = getHupai("n", players);
+              data.push(res);
+              if (statistic.huWay === "荣和") {
+                statistics[seats.n].ronghu += 1;
+                statistics[seats[statistic.fangchong]].fangchong += 1;
+              } else {
+                statistics[seats.n].zimo += 1;
+              }
+              statistics[seats.n].points.push(statistic.point);
+              statistics[seats.n].xunshu.push(xunNumber);
+              if (benchang >= 1 && statistics[seats.n].lianzhuang < benchang)
+                statistics[seats.n].lianzhuang = benchang;
             }
             isGameEnd = true;
           } else if (xiangting[seats.w] < 0) {
@@ -238,8 +345,24 @@ export const simpleComputing = (players, isStart, isGameStart) => {
               points[seats.e] -= 8000;
               benchang = 0;
               data.push(`${seats.w} 地和！32000点`);
+              statistics[seats.w].zimo += 1;
+              statistics[seats.w].points.push(32000);
+              statistics[seats.w].xunshu.push(xunNumber);
+              if (benchang >= 1 && statistics[seats.w].lianzhuang < benchang)
+                statistics[seats.w].lianzhuang = benchang;
             } else {
-              data.push(getHupai("w", players));
+              const { data: res, statistic } = getHupai("w", players);
+              data.push(res);
+              if (statistic.huWay === "荣和") {
+                statistics[seats.w].ronghu += 1;
+                statistics[seats[statistic.fangchong]].fangchong += 1;
+              } else {
+                statistics[seats.w].zimo += 1;
+              }
+              statistics[seats.w].points.push(statistic.point);
+              statistics[seats.w].xunshu.push(xunNumber);
+              if (benchang >= 1 && statistics[seats.w].lianzhuang < benchang)
+                statistics[seats.w].lianzhuang = benchang;
             }
             isGameEnd = true;
           } else if (xiangting[seats.s] < 0) {
@@ -255,8 +378,24 @@ export const simpleComputing = (players, isStart, isGameStart) => {
               points[seats.e] -= 8000;
               benchang = 0;
               data.push(`${seats.s} 地和！32000点`);
+              statistics[seats.s].zimo += 1;
+              statistics[seats.s].points.push(32000);
+              statistics[seats.s].xunshu.push(xunNumber);
+              if (benchang >= 1 && statistics[seats.s].lianzhuang < benchang)
+                statistics[seats.s].lianzhuang = benchang;
             } else {
-              data.push(getHupai("s", players));
+              const { data: res, statistic } = getHupai("s", players);
+              data.push(res);
+              if (statistic.huWay === "荣和") {
+                statistics[seats.s].ronghu += 1;
+                statistics[seats[statistic.fangchong]].fangchong += 1;
+              } else {
+                statistics[seats.s].zimo += 1;
+              }
+              statistics[seats.s].points.push(statistic.point);
+              statistics[seats.s].xunshu.push(xunNumber);
+              if (benchang >= 1 && statistics[seats.s].lianzhuang < benchang)
+                statistics[seats.s].lianzhuang = benchang;
             }
             isGameEnd = true;
           }
@@ -321,16 +460,31 @@ const getNextFeng = (name) => {
   }
 };
 
-const getTingpai = () => {
-  const ran = Math.random() * 3;
-  if (ran >= 0 && ran < 1) {
-    return "副露听牌";
-  } else if (ran >= 1 && ran < 2) {
+const getTingpai = (pos, players) => {
+  const detail = getPlayerDetail(seats[pos], players);
+  const base = (detail.speed / 100) * 0.7 + (detail.determination / 100) * 0.3;
+  const lizhibase = detail.determination / 100;
+
+  const ran = Math.random();
+  const lizhiran = Math.random();
+
+  let res;
+  if (ran >= base) {
+    res = "副露听牌";
+  } else if (ran < base && lizhiran >= lizhibase) {
     lizhibang++;
-    return "立直听牌";
-  } else if (ran >= 2 && ran < 3) {
-    return "默听";
+    res = "立直听牌";
+  } else {
+    res = "默听";
   }
+
+  return {
+    data: res,
+    statistic: {
+      fulu: res === "副露听牌" ? 1 : 0,
+      lizhi: res === "立直听牌" ? 1 : 0,
+    },
+  };
 };
 
 const getShoupai = (xiangting, players) => {
@@ -422,7 +576,14 @@ const getHupai = (pos, players) => {
       point + benchang * reachMj.benchang + lizhibang * reachMj.lizhibang;
     points[seats[dianpao]] -= point + benchang * reachMj.benchang;
     lizhibang = 0;
-    return `${seats[dianpao]}放铳！${seats[pos]} ${way}${point}点`;
+    return {
+      statistic: {
+        fangchong: dianpao,
+        point,
+        huWay: way,
+      },
+      data: `${seats[dianpao]}放铳！${seats[pos]} ${way}${point}点`,
+    };
   } else {
     let point = reachMj.pointZimo[pointran];
     if (pointran <= 4) {
@@ -467,7 +628,13 @@ const getHupai = (pos, players) => {
     }
     lizhibang = 0;
 
-    return `${seats[pos]} ${way}${finalPoint}点`;
+    return {
+      statistic: {
+        huWay: way,
+        point: finalPoint,
+      },
+      data: `${seats[pos]} ${way}${finalPoint}点`,
+    };
   }
 };
 
@@ -550,38 +717,4 @@ const recursionRandom = (position, player) => {
   }
 
   return position;
-};
-
-export const weightRand = (weights, start) => {
-  let totalWeight = 0;
-  for (let key in weights) {
-    totalWeight += weights[key];
-  }
-  const weightArr = [];
-  let rangeHead = 0;
-  for (let key in weights) {
-    const weight = weights[key] / totalWeight;
-    weightArr.push(weight + rangeHead);
-    rangeHead += weight;
-  }
-
-  const weightKeys = Object.keys(weights);
-
-  if (start === undefined) {
-    start = weightKeys[0];
-  }
-
-  const pran = Math.random();
-  let pointran;
-  for (let i = 0; i < weightArr.length; i++) {
-    if (i === 0 && pran < weightArr[i]) {
-      pointran = start;
-    } else if (pran < weightArr[i] && pran > weightArr[i - 1]) {
-      pointran = weightKeys[i];
-    } else {
-      continue;
-    }
-  }
-
-  return pointran;
 };
