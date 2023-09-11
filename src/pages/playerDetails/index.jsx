@@ -1,10 +1,33 @@
 import { Button, Col, Collapse, Descriptions, Modal, Row, Rate } from "antd";
 import EChartsReact from "echarts-for-react";
+import { useEffect, useState } from "react";
 
 export const PlayerDetail = ({ char, chartOptions, open, onClose }) => {
+  const [width, setWidth] = useState();
+  const [option, setOption] = useState();
+
+  useEffect(() => {
+    setWidth(
+      document.getElementById("property-charts-col")
+        ? document.getElementById("property-charts-col").clientWidth
+        : undefined
+    );
+    setOption(chartOptions);
+  }, [chartOptions]);
+
   const items = [
     {
       key: "1",
+      label: "基本信息",
+      children: (
+        <Descriptions column={{ xs: 1, sm: 2, md: 3, lg: 4, xl: 4, xxl: 4 }}>
+          <Descriptions.Item label="姓名">{char.name}</Descriptions.Item>
+          <Descriptions.Item label="所属战队">{char.team}</Descriptions.Item>
+        </Descriptions>
+      ),
+    },
+    {
+      key: "2",
       label: "属性",
       children: (
         <Row>
@@ -14,12 +37,14 @@ export const PlayerDetail = ({ char, chartOptions, open, onClose }) => {
               column={{ xs: 1, sm: 1, md: 1, lg: 1, xl: 1, xxl: 1 }}
             >
               <Descriptions.Item label="攻击力">
-                {char.attack}
+                {char.attack.toFixed(0)}
               </Descriptions.Item>
               <Descriptions.Item label="防御力">
-                {char.defense}
+                {char.defense.toFixed(0)}
               </Descriptions.Item>
-              <Descriptions.Item label="速度值">{char.speed}</Descriptions.Item>
+              <Descriptions.Item label="速度值">
+                {char.speed.toFixed(0)}
+              </Descriptions.Item>
             </Descriptions>
           </Col>
           <Col xs={24} sm={24} md={8} lg={8} xl={8}>
@@ -28,9 +53,11 @@ export const PlayerDetail = ({ char, chartOptions, open, onClose }) => {
               column={{ xs: 1, sm: 1, md: 1, lg: 1, xl: 1, xxl: 1 }}
             >
               <Descriptions.Item label="意志力">
-                {char.determination}
+                {char.determination.toFixed(0)}
               </Descriptions.Item>
-              <Descriptions.Item label="幸运值">{char.lucky}</Descriptions.Item>
+              <Descriptions.Item label="幸运值">
+                {char.lucky.toFixed(0)}
+              </Descriptions.Item>
             </Descriptions>
           </Col>
           <Col xs={24} sm={24} md={8} lg={8} xl={8}>
@@ -50,7 +77,7 @@ export const PlayerDetail = ({ char, chartOptions, open, onClose }) => {
       ),
     },
     {
-      key: "2",
+      key: "3",
       label: "比赛数据",
       children: (
         <Descriptions column={{ xs: 1, sm: 2, md: 3, lg: 3, xl: 4, xxl: 4 }}>
@@ -197,7 +224,7 @@ export const PlayerDetail = ({ char, chartOptions, open, onClose }) => {
       ),
     },
     {
-      key: "3",
+      key: "4",
       label: "比赛成就",
       children: (
         <Descriptions column={{ xs: 1, sm: 1, md: 1, lg: 1, xl: 1, xxl: 1 }}>
@@ -212,6 +239,7 @@ export const PlayerDetail = ({ char, chartOptions, open, onClose }) => {
       ),
     },
   ];
+
   return (
     <Modal
       title={char.name}
@@ -225,11 +253,30 @@ export const PlayerDetail = ({ char, chartOptions, open, onClose }) => {
       onCancel={onClose}
     >
       <Row>
-        <Col xs={24} sm={24} md={8} lg={8} xl={8}>
-          <EChartsReact option={chartOptions} />
+        <Col
+          id="property-charts-col"
+          xs={24}
+          sm={24}
+          md={8}
+          lg={8}
+          xl={8}
+          xxl={8}
+        >
+          {width !== undefined && (
+            <EChartsReact
+              option={option}
+              style={{ width: "100%", minWidth: width }}
+              // style={{
+              //   width: "100%",
+              //   minWidth: "200px",
+              //   minHeight: "200px",
+              //   height: "100%",
+              // }}
+            />
+          )}
         </Col>
-        <Col xs={24} sm={24} md={16} lg={16} xl={16}>
-          <Collapse items={items} />
+        <Col xs={24} sm={24} md={16} lg={16} xl={16} xxl={16}>
+          <Collapse items={items} defaultActiveKey={["1", "2", "3", "4"]} />
         </Col>
       </Row>
     </Modal>

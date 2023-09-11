@@ -65,7 +65,7 @@ export const LineUp = ({ players }) => {
           cover={
             <EChartsReact
               option={option}
-              style={{ height: "100%", maxHeight: "700px" }}
+              style={{ height: "100%", maxHeight: "900px" }}
             />
           }
           onClick={() => {
@@ -109,14 +109,16 @@ export const LineUp = ({ players }) => {
           <Row>{cardNode}</Row>
         </Content>
       </Layout>
-      <PlayerDetail
-        char={char}
-        chartOptions={chartOption}
-        open={openDetail}
-        onClose={() => {
-          setOpenDetail(false);
-        }}
-      />
+      {char && (
+        <PlayerDetail
+          char={char}
+          chartOptions={chartOption}
+          open={openDetail}
+          onClose={() => {
+            setOpenDetail(false);
+          }}
+        />
+      )}
     </>
   );
 };

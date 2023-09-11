@@ -1,23 +1,11 @@
-import { Table, Layout, Cascader, Empty, Select } from "antd";
+import { Table, Layout, Cascader, Empty, Select, Button } from "antd";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import { scheduleGenerator } from "../../data/schedule/schedule";
 import { initialStandings } from "../../data/standings/initial";
+import { PlayerDetail } from "../playerDetails";
 
 const { Content } = Layout;
-
-const column = [
-  {
-    title: "名字",
-    dataIndex: "name",
-    key: "name",
-  },
-  {
-    title: "分数",
-    dataIndex: "pt",
-    key: "pt",
-  },
-];
 
 export const Standings = observer(({ standings, playersMap }) => {
   const [isShowTable, setIsShowTable] = useState(true);
@@ -26,6 +14,10 @@ export const Standings = observer(({ standings, playersMap }) => {
   const [isTeam, setIsTeam] = useState(false);
   const [teamOrInd, setTeamOrInd] = useState(0);
   const [cascader, setCascader] = useState([]);
+
+  const [char, setChar] = useState();
+  const [chartOption, setChartOption] = useState();
+  const [openDetail, setOpenDetail] = useState(false);
 
   useEffect(() => {
     const cascader = [];
@@ -105,56 +97,139 @@ export const Standings = observer(({ standings, playersMap }) => {
     setLeague(v);
   };
 
+  const column = [
+    {
+      title: "名字",
+      dataIndex: "name",
+      key: "name",
+      render: (text, record) =>
+        teamOrInd === 0 ? (
+          <Button
+            type="link"
+            onClick={() => {
+              setChar(playersMap[record.key]);
+              setChartOption({
+                radar: {
+                  indicator: [
+                    {
+                      name: "攻击力",
+                      max: 100,
+                    },
+                    {
+                      name: "防御力",
+                      max: 100,
+                    },
+                    {
+                      name: "速度值",
+                      max: 100,
+                    },
+                    {
+                      name: "幸运值",
+                      max: 100,
+                    },
+                    {
+                      name: "意志力",
+                      max: 100,
+                    },
+                  ],
+                },
+                series: [
+                  {
+                    type: "radar",
+                    center: ["50%", "50%"],
+                    data: [
+                      {
+                        value: [
+                          playersMap[record.key].attack,
+                          playersMap[record.key].defense,
+                          playersMap[record.key].speed,
+                          playersMap[record.key].lucky,
+                          playersMap[record.key].determination,
+                        ],
+                        name: playersMap[record.key].name,
+                      },
+                    ],
+                  },
+                ],
+              });
+              setOpenDetail(true);
+            }}
+          >
+            {text}
+          </Button>
+        ) : (
+          text
+        ),
+    },
+    {
+      title: "分数",
+      dataIndex: "pt",
+      key: "pt",
+    },
+  ];
+
   return (
-    <Layout
-      style={{
-        padding: "24px 0",
-        background: "white",
-        height: "100%",
-        minHeight: 280,
-      }}
-    >
-      <Content
-        id="standing-table-content"
-        style={{ padding: "0 24px", minHeight: 280 }}
+    <>
+      <Layout
+        style={{
+          padding: "24px 0",
+          background: "white",
+          height: "100%",
+          minHeight: 280,
+        }}
       >
-        <div style={{ display: "flex" }}>
-          <div>
-            <Cascader
-              options={cascader}
-              value={league}
-              onChange={onSetLeagueChange}
-            />
-          </div>
-          {isTeam && (
-            <div style={{ marginLeft: "auto" }}>
-              <Select
-                value={teamOrInd}
-                options={[
-                  { label: "个人", value: 0 },
-                  { label: "队伍", value: 1 },
-                ]}
-                onChange={(v) => {
-                  setTeamOrInd(v);
-                }}
+        <Content
+          id="standing-table-content"
+          style={{ padding: "0 24px", minHeight: 280 }}
+        >
+          <div style={{ display: "flex" }}>
+            <div>
+              <Cascader
+                options={cascader}
+                value={league}
+                onChange={onSetLeagueChange}
               />
             </div>
+            {isTeam && (
+              <div style={{ marginLeft: "auto" }}>
+                <Select
+                  value={teamOrInd}
+                  options={[
+                    { label: "个人", value: 0 },
+                    { label: "队伍", value: 1 },
+                  ]}
+                  onChange={(v) => {
+                    setTeamOrInd(v);
+                  }}
+                />
+              </div>
+            )}
+          </div>
+          {isShowTable ? (
+            <Table
+              title={() => {
+                return league[0];
+              }}
+              columns={column}
+              dataSource={table}
+              pagination={false}
+              scroll={{ y: 280 }}
+            />
+          ) : (
+            <Empty description="此比赛还未开始" image={undefined} />
           )}
-        </div>
-        {isShowTable ? (
-          <Table
-            title={() => {
-              return league[0];
-            }}
-            columns={column}
-            dataSource={table}
-            pagination={false}
-            scroll={{ y: 280 }}
-          />
-        ) : (
-          <Empty description="此比赛还未开始" image={undefined} />
-        )}
-      </Content>
-    </Layout>
+        </Content>
+      </Layout>
+      {char && (
+        <PlayerDetail
+          char={char}
+          chartOptions={chartOption}
+          open={openDetail}
+          onClose={() => {
+            setOpenDetail(false);
+          }}
+        />
+      )}
+    </>
   );
 });

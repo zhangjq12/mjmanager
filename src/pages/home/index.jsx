@@ -227,7 +227,7 @@ export const Home = observer(({ originData }) => {
       charInvited,
       myTeam
     );
-    const newChar = newP.filter((v) => chars.find((c) => c.id === v.id))
+    const newChar = newP.filter((v) => chars.find((c) => c.id === v.id));
     setPlayers(newP);
     setChars(newChar);
 
@@ -298,6 +298,43 @@ export const Home = observer(({ originData }) => {
     window.location.reload();
   };
 
+  const changeTrainingCb = (id, value) => {
+    const pIndex = players.findIndex((v) => v.id === id);
+    players[pIndex].trainingName = value;
+    switch (value) {
+      case "攻击为主":
+        players[pIndex].training = {
+          attack: "++",
+          defense: "-",
+          speed: "+",
+        };
+        break;
+      case "防御为主":
+        players[pIndex].training = {
+          attack: "-",
+          defense: "++",
+          speed: "=",
+          determination: "+",
+        };
+        break;
+      case "攻速为主":
+        players[pIndex].training = {
+          attack: "=",
+          defense: "-",
+          speed: "++",
+          lucky: "+",
+        };
+        break;
+      default:
+        break;
+    }
+  };
+
+  const changeEnhanceCb = (id, value) => {
+    const pIndex = players.findIndex((v) => v.id === id);
+    players[pIndex].enhancement = value;
+  };
+
   const menuNode = [
     {
       key: 1,
@@ -315,10 +352,10 @@ export const Home = observer(({ originData }) => {
     //   key: 3,
     //   label: "招募",
     // },
-    // {
-    //   key: 4,
-    //   label: "训练",
-    // },
+    {
+      key: 4,
+      label: "训练",
+    },
     {
       key: 5,
       label: "排名",
@@ -475,7 +512,12 @@ export const Home = observer(({ originData }) => {
           ) : menuKeys === 3 ? (
             <Recruit />
           ) : menuKeys === 4 ? (
-            <Training />
+            <Training
+              players={chars}
+              today={today}
+              changeTrainingCb={changeTrainingCb}
+              changeEnhanceCb={changeEnhanceCb}
+            />
           ) : menuKeys === 5 ? (
             <Standings standings={standingsMap} playersMap={playersMap} />
           ) : null}

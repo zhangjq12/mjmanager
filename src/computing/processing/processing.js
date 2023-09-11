@@ -31,6 +31,12 @@ export const continueGame = async (
     if (v.injury && v.period === 0) {
       v.injury = false;
     }
+    if (
+      new Date(today).getMonth() === new Date(v.birthday).getMonth() &&
+      new Date(today).getDate() === new Date(v.birthday).getDate()
+    ) {
+      v.age += 1;
+    }
     return v;
   });
   const pM = modifyAbility(p, calendar, today);
@@ -161,7 +167,7 @@ export const continueGame = async (
     res.push(mesEnd);
   }
 
-  if (new Date(today).getMonth() === 7 && new Date(today).getDate() === 30) {
+  if (new Date(today).getMonth() === 7 && new Date(today).getDate() === 31) {
     reinitSeason(players, today);
   }
 
@@ -178,8 +184,9 @@ const modifyAbility = (players, calendar, today) => {
   ).toLocaleDateString();
   return players.map((value) => {
     let v = JSON.parse(JSON.stringify(value));
+
     if (v.ca < v.pa) {
-      if (v.age < 35) {
+      if (v.age < 40) {
         if (v.determination > 70) {
           v.attack += 0.02 * (calendar[prevDay] ? 2 : 1);
           v.defense += 0.02 * (calendar[prevDay] ? 2 : 1);
@@ -193,6 +200,37 @@ const modifyAbility = (players, calendar, today) => {
           v.defense += 0.005 * (calendar[prevDay] ? 3 : 1);
           v.speed += 0.005 * (calendar[prevDay] ? 3 : 1);
         }
+      }
+
+      const trainKeys = Object.keys(v.training);
+      if (trainKeys.length > 0) {
+        for (const key of trainKeys) {
+          if (v.training[key] === "+") {
+            v[key] += 0.02;
+          } else if (v.training[key] === "+") {
+            v[key] += 0.01;
+          } else if (v.training[key] === "-") {
+            v[key] -= 0.01;
+          } else if (v.training[key] === "--") {
+            v[key] -= 0.02;
+          } else if (v.training[key] === "=") {
+            v[key] += 0;
+          }
+        }
+      }
+
+      switch (v.enhancement) {
+        case "attack":
+          v.attack += 0.02;
+          break;
+        case "defense":
+          v.defense += 0.02;
+          break;
+        case "speed":
+          v.speed += 0.02;
+          break;
+        default:
+          break;
       }
     } else if (v.age > 50) {
       if (v.determination > 70) {
@@ -225,13 +263,18 @@ const modifyAbility = (players, calendar, today) => {
       }
     }
     v.ca = Math.round(v.attack / 3 + v.defense / 3 + v.speed / 3);
+    v.propertiesChanges.attack.push(v.attack);
+    v.propertiesChanges.defense.push(v.defense);
+    v.propertiesChanges.speed.push(v.speed);
+    v.propertiesChanges.lucky.push(v.lucky);
+    v.propertiesChanges.determination.push(v.determination);
     return v;
   });
 };
 
 const randomEvents = (players) => {
   const events = {};
-  const base = 0.9;
+  const base = 0.95;
   for (const player of players) {
     const rand = Math.random();
     if (rand >= base) {
@@ -545,6 +588,17 @@ const endOfLeagueOrCup = (calendar, today, players, myTeam) => {
         return v;
       });
     }
+
+    resPlayers = resPlayers.map((v) => {
+      v.propertiesChanges = {
+        attack: [],
+        defense: [],
+        speed: [],
+        lucky: [],
+        determination: [],
+      };
+      return v;
+    });
 
     const chars = resPlayers
       .filter((v) => v.team === myTeam)
