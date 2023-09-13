@@ -229,6 +229,15 @@ export const Home = observer(({ originData }) => {
     );
     const newChar = newP.filter((v) => chars.find((c) => c.id === v.id));
     setPlayers(newP);
+    setPlayersMap(
+      (() => {
+        const map = {};
+        newP.forEach((v) => {
+          map[v.id] = v;
+        });
+        return map;
+      })()
+    );
     setChars(newChar);
 
     if (messages.length > 0) {
@@ -266,9 +275,9 @@ export const Home = observer(({ originData }) => {
       localStorage.setItem(
         "SAVED_DATA",
         JSON.stringify({
-          players: players,
+          players: newP,
           mails: newOriginMailData,
-          teamMembers: chars,
+          teamMembers: newChar,
           date: thisDay,
           calendar: calendar,
           schedule: schedule,
