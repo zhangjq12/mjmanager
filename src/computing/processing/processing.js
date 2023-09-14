@@ -169,6 +169,16 @@ export const continueGame = async (
 
   if (new Date(today).getMonth() === 7 && new Date(today).getDate() === 31) {
     reinitSeason(players, today);
+    resPWA = resPWA.map((v) => {
+      v.propertiesChanges = {
+        attack: [],
+        defense: [],
+        speed: [],
+        lucky: [],
+        determination: [],
+      };
+      return v;
+    });
   }
 
   return {
@@ -588,17 +598,6 @@ const endOfLeagueOrCup = (calendar, today, players, myTeam) => {
         return v;
       });
     }
-
-    resPlayers = resPlayers.map((v) => {
-      v.propertiesChanges = {
-        attack: [],
-        defense: [],
-        speed: [],
-        lucky: [],
-        determination: [],
-      };
-      return v;
-    });
 
     const chars = resPlayers
       .filter((v) => v.team === myTeam)

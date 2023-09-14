@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Layout,
   Menu,
@@ -145,6 +145,7 @@ export const Home = observer(({ originData }) => {
     return () => {
       clearInterval(timer);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [originData]);
 
   const setMailReadStatus = (itemsMap) => {
@@ -195,7 +196,7 @@ export const Home = observer(({ originData }) => {
     setMailSelectedKey(info.key);
   };
 
-  const onContinueGame = async () => {
+  const onContinueGame = useCallback(async () => {
     if (mailBadgeCount > 0) {
       const { res: data, lastIndex } = setMailReadStatus(originMailData);
       originMailData[lastIndex].read = true;
@@ -207,13 +208,36 @@ export const Home = observer(({ originData }) => {
       setDrawerTitle("进行中……");
       setDrawerClosable(false);
       setDrawerOpen(true);
-      await processing(thisDay);
+      setTimeout(async () => {
+        await processing(players, chars, playersMap, thisDay);
+      }, 1000);
     } else if (continueButton === "进行比赛") {
       setGameStartModalOpen(true);
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    players,
+    chars,
+    today,
+    continueButton,
+    mailBadgeCount,
+    originMailData,
+    playersMap,
+  ]);
 
-  const processing = async (thisDay, singleGameRes = undefined) => {
+  useEffect(() => {
+    window.onkeydown = (e) => {
+      if (e.key === " ") onContinueGame();
+    };
+  }, [onContinueGame]);
+
+  const processing = async (
+    players,
+    chars,
+    playersMap,
+    thisDay,
+    singleGameRes = undefined
+  ) => {
     thisDay = new Date(thisDay);
     thisDay = new Date(
       thisDay.setDate(thisDay.getDate() + 1)
@@ -237,15 +261,11 @@ export const Home = observer(({ originData }) => {
     );
     const newChar = newP.filter((v) => chars.find((c) => c.id === v.id));
     setPlayers(newP);
-    setPlayersMap(
-      (() => {
-        const map = {};
-        newP.forEach((v) => {
-          map[v.id] = v;
-        });
-        return map;
-      })()
-    );
+    const newMap = {};
+    newP.forEach((v) => {
+      newMap[v.id] = v;
+    });
+    setPlayersMap(newMap);
     setChars(newChar);
 
     if (messages.length > 0) {
@@ -297,7 +317,7 @@ export const Home = observer(({ originData }) => {
     } else {
       setToday(thisDay);
       setTimeout(() => {
-        processing(thisDay);
+        processing(newP, newChar, newMap, thisDay);
       }, 1000);
     }
   };
@@ -308,7 +328,9 @@ export const Home = observer(({ originData }) => {
     setDrawerTitle("进行中……");
     setDrawerClosable(false);
     setDrawerOpen(true);
-    await processing(thisDay, res);
+    setTimeout(async () => {
+      await processing(players, chars, playersMap, thisDay, res);
+    }, 1000);
   };
 
   const onRestart = () => {

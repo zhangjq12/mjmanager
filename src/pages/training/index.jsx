@@ -67,7 +67,7 @@ export const Training = ({
                     alignItems: "center",
                   }}
                 >
-                  训练计划：
+                  <div style={{ width: "120px" }}>训练计划：</div>
                   <Select
                     options={[
                       { label: "无", value: "无" },
@@ -75,6 +75,7 @@ export const Training = ({
                       { label: "防御为主", value: "防御为主" },
                       { label: "攻速为主", value: "攻速为主" },
                     ]}
+                    style={{ width: "100%" }}
                     value={playersMap[id].trainingName}
                     onChange={(v) => {
                       changeTrainingCb(id, v);
@@ -88,7 +89,7 @@ export const Training = ({
                     alignItems: "center",
                   }}
                 >
-                  专项提升：
+                  <div style={{ width: "120px" }}>专项提升：</div>
                   <Select
                     options={[
                       { label: "无", value: "" },
@@ -96,6 +97,7 @@ export const Training = ({
                       { label: "防御力", value: "defense" },
                       { label: "速度值", value: "speed" },
                     ]}
+                    style={{ width: "100%" }}
                     value={playersMap[id].enhancement}
                     onChange={(v) => {
                       changeEnhanceCb(id, v);
