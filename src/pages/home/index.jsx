@@ -194,7 +194,13 @@ export const Home = observer(({ originData }) => {
   };
 
   const onContinueGame = async () => {
-    if (continueButton === "继续游戏") {
+    if (mailBadgeCount > 0) {
+      const { res: data, lastIndex } = setMailReadStatus(originMailData);
+      originMailData[lastIndex].read = true;
+      setOriginMailData([...originMailData]);
+      setMailData(data);
+      setMailBadgeCount(data.filter((v) => !v.read).length);
+    } else if (continueButton === "继续游戏") {
       let thisDay = new Date(today);
       setDrawerTitle("进行中……");
       setDrawerClosable(false);
@@ -264,6 +270,7 @@ export const Home = observer(({ originData }) => {
       setMailBadgeCount(data.filter((v) => !v.read).length);
       setToday(thisDay);
       setDrawerOpen(false);
+      setMenuKeys(1);
       if (Object.keys(match).length > 0) {
         setCharsInvited(Object.keys(match));
         setMatchPlayers(match);
@@ -478,8 +485,9 @@ export const Home = observer(({ originData }) => {
               <Menu
                 theme="dark"
                 mode="horizontal"
-                defaultSelectedKeys={["1"]}
+                // defaultSelectedKeys={["1"]}
                 items={menuNode}
+                selectedKeys={[menuKeys.toString()]}
                 onClick={(info) => {
                   setMenuKeys(parseInt(info.key));
                 }}
@@ -573,7 +581,7 @@ export const Home = observer(({ originData }) => {
           //   }
           //   if (boo) break;
           // }
-
+          
           setGamePlayers(matchPlayers[charWatched]);
           setGameStart(true);
           setGameStartModalOpen(false);

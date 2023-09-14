@@ -1,6 +1,8 @@
 import { reachMj } from "../rules/rules";
 import { weightRand } from "./utils";
 
+let isStart = true;
+let isGameStart = true;
 let xunNumber = 0;
 let xiangting = {};
 let isGameEnd = false;
@@ -25,10 +27,10 @@ let benchang = 0;
 let lizhibang = 0;
 let liujuZhuangmeiting = false;
 
-export const simpleComputing = (players, isStart, isGameStart) => {
+export const simpleComputing = (players) => {
   let data = [];
   let allEnd = false;
-  let gameStart = isGameStart;
+  // let gameStart = isGameStart;
   let finalRes;
 
   if (isStart) {
@@ -106,14 +108,15 @@ export const simpleComputing = (players, isStart, isGameStart) => {
         jushu: 0,
       },
     };
+    isStart = false;
   } else {
-    if (gameStart) {
+    if (isGameStart) {
       data.push(
         `${getFengName(gameFeng)}场第${
           gameNumber + 1
         }局 ${benchang}本场 庄位：${seats.e}`
       );
-      gameStart = false;
+      isGameStart = false;
       const xiangtingWeight = {
         0: 0.01,
         1: 1,
@@ -137,7 +140,7 @@ export const simpleComputing = (players, isStart, isGameStart) => {
         for (const name in statistics) {
           statistics[name].jushu++;
         }
-        gameStart = true;
+        isGameStart = true;
         let newSeats = {
           e: seats.e,
           n: seats.n,
@@ -160,7 +163,7 @@ export const simpleComputing = (players, isStart, isGameStart) => {
         }
         if (gameFeng === "w") {
           isAllEnd = true;
-          gameStart = false;
+          isGameStart = false;
         }
         seats = newSeats;
         isGameEnd = false;
@@ -191,6 +194,8 @@ export const simpleComputing = (players, isStart, isGameStart) => {
         }
         pts[0] = Math.round(-(pts[1] + pts[2] + pts[3]) * 10) / 10;
         allEnd = true;
+        isStart = true;
+        isGameStart = true;
         points = {};
         xiangting = {};
         gameFeng = "e";
@@ -419,7 +424,7 @@ export const simpleComputing = (players, isStart, isGameStart) => {
 
   return {
     data,
-    isGameStart: gameStart,
+    // isGameStart: gameStart,
     allEnd,
     finalRes,
   };

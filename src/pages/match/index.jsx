@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Layout, Button, List } from "antd";
+import { Layout, Button, List, Segmented } from "antd";
 import "./index.css";
 // import { generateMock, mockData } from "../../computing/mock/mock";
 import { simpleComputing } from "../../computing/simple/simple";
@@ -15,6 +15,8 @@ export const Match = ({ chars, endCallback, today, gameName }) => {
   const [data, setData] = useState();
   const [endDisabled, setEndDisabled] = useState(true);
   const [res, setRes] = useState();
+
+  const [speed, setSpeed] = useState("1x");
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -36,14 +38,28 @@ export const Match = ({ chars, endCallback, today, gameName }) => {
     if (players.length === 0) {
       return;
     }
-    let isStart = true;
-    let isGameStart = true;
-    let isAllEnd = false;
+
+    let time = 1000;
+    switch (speed) {
+      case "2x":
+        time = time / 2;
+        break;
+      case "4x":
+        time = time / 4;
+        break;
+      case "8x":
+        time = time / 8;
+        break;
+      default:
+        break;
+    }
+    // let isStart = true;
+    // let isGameStart = true;
+    // let isAllEnd = false;
     const timer = setInterval(() => {
-      const data = simpleComputing(players, isStart, isGameStart);
-      isStart = false;
-      isGameStart = data.isGameStart;
-      isAllEnd = data.allEnd;
+      const data = simpleComputing(players);
+      // const isGameStart = data.isGameStart;
+      const isAllEnd = data.allEnd;
 
       // generateMock();
       realData.push(...data.data);
@@ -60,13 +76,13 @@ export const Match = ({ chars, endCallback, today, gameName }) => {
         return;
       }
       setData([...realData]);
-    }, 500);
+    }, time);
 
     return () => {
       clearInterval(timer);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [players]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [players, speed]);
 
   useEffect(() => {
     const ele = document.getElementById("scrollableDiv");
@@ -96,10 +112,18 @@ export const Match = ({ chars, endCallback, today, gameName }) => {
       </Header>
       <Content
         style={{
-          padding: "30px 50px 0 50px",
+          padding: "0px 50px 30px 50px",
           flex: 1,
         }}
       >
+        <div style={{ padding: "5px 16px" }}>
+          <Segmented
+            block
+            options={["1x", "2x", "4x", "8x"]}
+            value={speed}
+            onChange={setSpeed}
+          />
+        </div>
         <div
           id="scrollableDiv"
           style={{
