@@ -9,6 +9,7 @@ import {
   Col,
   Modal,
   Radio,
+  message,
 } from "antd";
 import "./index.css";
 import { MailIndex } from "../mailIndex";
@@ -95,6 +96,7 @@ export const Home = observer(({ originData }) => {
   const [charWatched, setCharWatched] = useState("");
   const [charInvited, setCharsInvited] = useState([]);
   const [matchPlayers, setMatchPlayers] = useState({});
+  const [charSelect, setCharSelect] = useState(false);
 
   const [calendar, setCalendar] = useState({});
   const [schedule, setSchedule] = useState({});
@@ -581,7 +583,12 @@ export const Home = observer(({ originData }) => {
           //   }
           //   if (boo) break;
           // }
-          
+          if (!charSelect) {
+            message.error("请选择观看队员");
+            return;
+          }
+
+          setCharSelect(false);
           setGamePlayers(matchPlayers[charWatched]);
           setGameStart(true);
           setGameStartModalOpen(false);
@@ -597,6 +604,7 @@ export const Home = observer(({ originData }) => {
             };
           })}
           onChange={({ target: { value } }) => {
+            setCharSelect(true);
             setCharWatched(value);
           }}
         />
