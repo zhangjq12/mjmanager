@@ -3,13 +3,14 @@ import { Layout, Button, List, Segmented } from "antd";
 import "./index.css";
 // import { generateMock, mockData } from "../../computing/mock/mock";
 import { simpleComputing } from "../../computing/simple/simple";
+import Color from "color";
 
 const { Header, Content, Footer } = Layout;
 
 export let realData = [];
 // let players = ["日麻教父", "赤五教主", "艾斯艾芙", "小*豆"];
 
-export const Match = ({ chars, endCallback, today, gameName }) => {
+export const Match = ({ chars, endCallback, today, gameName, color }) => {
   const [players, setPlayers] = useState([]);
   const [currentTime, setCurrentTime] = useState("");
   const [data, setData] = useState();
@@ -101,9 +102,15 @@ export const Match = ({ chars, endCallback, today, gameName }) => {
         style={{
           display: "flex",
           alignItems: "center",
+          backgroundColor: Color(color).alpha(0.5),
         }}
       >
-        <div className="demo-logo">麻将经理人</div>
+        <div
+          className="demo-logo"
+          style={{ color: Color(color).alpha(0.5).isDark() ? "#fff" : "#000" }}
+        >
+          麻将经理人
+        </div>
         <div className="right-button">
           <Button type="primary" disabled={endDisabled} onClick={onClick}>
             结束比赛

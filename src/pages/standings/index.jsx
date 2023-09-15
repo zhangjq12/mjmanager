@@ -7,7 +7,7 @@ import { PlayerDetail } from "../playerDetails";
 
 const { Content } = Layout;
 
-export const Standings = observer(({ standings, playersMap }) => {
+export const Standings = observer(({ standings, playersMap, color }) => {
   const [isShowTable, setIsShowTable] = useState(true);
   const [table, setTable] = useState([]);
   const [league, setLeague] = useState(["立直麻将联赛"]);
@@ -149,6 +149,9 @@ export const Standings = observer(({ standings, playersMap }) => {
                         name: playersMap[record.key].name,
                       },
                     ],
+                    itemStyle: {
+                      color: color,
+                    },
                   },
                 ],
               });

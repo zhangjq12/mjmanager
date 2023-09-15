@@ -1,16 +1,16 @@
-export const TEAM = ["立直魔术师", "魂天队", "复仇者联盟", "RPG"];
+export const TEAM = ["魂天队", "复仇者联盟", "RPG"];
 
-export const randomTeam = (char, players) => {
+export const randomTeam = (char, players, team) => {
   const map = {};
   const resChar = char.map((v) => {
-    v.team = TEAM[0];
+    v.team = team;
     map[v.id] = 1;
     return v;
   });
   const restPlayers = players.filter((v) => map[v.id] === undefined);
 
   const resPlayers = [];
-  let teamIndex = 1;
+  let teamIndex = 0;
   let lenDecreased = 0;
   while (restPlayers.length > 0) {
     const rand = Math.floor(Math.random() * restPlayers.length);

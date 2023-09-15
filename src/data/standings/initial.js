@@ -4,7 +4,7 @@ export const initialStandings = [
     type: "联赛",
     isTeam: true,
     isWeekend: true,
-    startDate: "8/31",
+    startDate: "9/1",
   },
   {
     name: "天神杯",

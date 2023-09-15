@@ -6,7 +6,7 @@ import { useState } from "react";
 const { Meta } = Card;
 const { Content } = Layout;
 
-export const LineUp = ({ players }) => {
+export const LineUp = ({ players, color }) => {
   const [char, setChar] = useState(players[0]);
   const [chartOption, setChartOption] = useState();
   const [openDetail, setOpenDetail] = useState(false);
@@ -53,6 +53,9 @@ export const LineUp = ({ players }) => {
               name: v.name,
             },
           ],
+          itemStyle: {
+            color: color,
+          }
         },
       ],
     };

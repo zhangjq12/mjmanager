@@ -25,6 +25,7 @@ import { Match } from "../match";
 import { standingsMap } from "../../data/standings/standings";
 import { observer } from "mobx-react-lite";
 import { scheduleGenerator } from "../../data/schedule/schedule";
+import Color from "color";
 
 const { Header, Content, Footer } = Layout;
 
@@ -68,7 +69,7 @@ const { Header, Content, Footer } = Layout;
 //   },
 // ];
 
-export const Home = observer(({ originData }) => {
+export const Home = observer(({ originData, color }) => {
   const [schedules] = useState(() => scheduleGenerator);
 
   const [currentTime, setCurrentTime] = useState("");
@@ -312,6 +313,7 @@ export const Home = observer(({ originData }) => {
           schedule: schedule,
           standings: standingsMap.standingMap,
           match: match,
+          color: color,
         })
       );
     } else {
@@ -379,7 +381,7 @@ export const Home = observer(({ originData }) => {
     {
       key: 1,
       label: (
-        <Badge count={mailBadgeCount}>
+        <Badge count={mailBadgeCount} styles={{ root: { color: "inherit" } }}>
           <span>收件箱</span>
         </Badge>
       ),
@@ -490,6 +492,7 @@ export const Home = observer(({ originData }) => {
         <Header
           style={{
             height: window.innerWidth <= 576 ? "128px" : "64px",
+            backgroundColor: Color(color).alpha(0.5),
           }}
           // style={{
           //   display: "flex",
@@ -498,7 +501,12 @@ export const Home = observer(({ originData }) => {
         >
           <Row>
             <Col xs={24} sm={24} md={6}>
-              <div className="demo-logo">
+              <div
+                className="demo-logo"
+                style={{
+                  color: Color(color).alpha(0.5).isDark() ? "#fff" : "#000",
+                }}
+              >
                 麻将经理人{" "}
                 <Button type="primary" onClick={onRestart}>
                   重开档
@@ -512,6 +520,7 @@ export const Home = observer(({ originData }) => {
                 // defaultSelectedKeys={["1"]}
                 items={menuNode}
                 selectedKeys={[menuKeys.toString()]}
+                style={{ backgroundColor: Color(color).alpha(0.5) }}
                 onClick={(info) => {
                   setMenuKeys(parseInt(info.key));
                 }}
@@ -520,7 +529,10 @@ export const Home = observer(({ originData }) => {
             <Col xs={20} sm={20} md={6}>
               <div className="right-button">
                 <div
-                  style={{ padding: "0 5px", color: "white" }}
+                  style={{
+                    padding: "0 5px",
+                    color: Color(color).alpha(0.5).isDark() ? "#fff" : "#000",
+                  }}
                   onClick={() => {
                     setDrawerTitle("未来日程");
                     setDrawerClosable(true);
@@ -549,7 +561,7 @@ export const Home = observer(({ originData }) => {
               onSelect={mailSelectedCallback}
             />
           ) : menuKeys === 2 ? (
-            <LineUp players={chars} />
+            <LineUp players={chars} color={color} />
           ) : menuKeys === 3 ? (
             <Recruit />
           ) : menuKeys === 4 ? (
@@ -560,7 +572,11 @@ export const Home = observer(({ originData }) => {
               changeEnhanceCb={changeEnhanceCb}
             />
           ) : menuKeys === 5 ? (
-            <Standings standings={standingsMap} playersMap={playersMap} />
+            <Standings
+              standings={standingsMap}
+              playersMap={playersMap}
+              color={color}
+            />
           ) : null}
         </Content>
         <Footer
@@ -638,6 +654,7 @@ export const Home = observer(({ originData }) => {
       endCallback={endCallback}
       date={today}
       gameName={calendar[today]}
+      color={color}
     />
   );
 });

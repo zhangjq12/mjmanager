@@ -7,6 +7,8 @@ import { mockChar } from "./computing/mock/mock";
 import { scheduleGenerator } from "./data/schedule/schedule";
 import { initSchedule } from "./computing/schedule/schedule";
 import { randomTeam } from "./computing/team/team";
+import { ConfigProvider } from "antd";
+import Color from "color";
 // import { Match } from "./pages/match";
 
 function App() {
@@ -21,6 +23,7 @@ function App() {
   //   setPage(1);
   // }
   const [data, setData] = useState();
+  const [color, setColor] = useState("#1677ff");
 
   useEffect(() => {
     let originData = localStorage.getItem("SAVED_DATA");
@@ -28,24 +31,27 @@ function App() {
       setPage(1);
     } else {
       originData = JSON.parse(originData);
+      setColor(originData.color);
       setData(originData);
       scheduleGenerator.load(originData.calendar, originData.schedule);
       setPage(2);
     }
   }, []);
 
-  const callback = async (res) => {
+  const callback = async (res, team, color) => {
     setLoading(true);
-    const originData = await initGame(res);
+    const originData = await initGame(res, team, color);
     setLoading(false);
     setData(originData);
+    console.log(Color(color).isDark());
+    setColor(color);
     setPage(2);
   };
 
-  const initGame = async (res) => {
+  const initGame = async (res, team, color) => {
     return new Promise((resolve) => {
       const StandingsInit = {};
-      const { players, char: chars } = randomTeam(res, mockChar);
+      const { players, char: chars } = randomTeam(res, mockChar, team);
 
       initSchedule(players, "2023/8/31");
 
@@ -77,6 +83,7 @@ function App() {
         calendar: scheduleGenerator.getCalendar(),
         schedule: scheduleGenerator.getAll(),
         standings: StandingsInit,
+        color: color,
       };
 
       resolve(originData);
@@ -85,12 +92,34 @@ function App() {
 
   return (
     <div className="App">
-      {/* <Spin tip="加载游戏中..." spinning={loading}> */}
-      {page === 1 && <StartPage callback={callback} loading={loading} />}
-      {/* </Spin> */}
-      {page === 2 && <Home originData={data} />}
-      {/* {page === 1 && <Demo callback={callback} />}
+      <ConfigProvider
+        theme={{
+          token: {
+            colorPrimary: color,
+            colorLink: color,
+            colorPrimaryText: Color(color).isDark() ? "#ffffff" : "#000000",
+          },
+          components: {
+            Button: {
+              colorTextLightSolid: Color(color).isDark()
+                ? "#ffffff"
+                : "#000000",
+            },
+            Menu: {
+              colorTextLightSolid: Color(color).isDark()
+                ? "#ffffff"
+                : "#000000",
+            },
+          },
+        }}
+      >
+        {/* <Spin tip="加载游戏中..." spinning={loading}> */}
+        {page === 1 && <StartPage callback={callback} loading={loading} />}
+        {/* </Spin> */}
+        {page === 2 && <Home originData={data} color={color} />}
+        {/* {page === 1 && <Demo callback={callback} />}
       {page === 2 && <Match chars={chars} endCallback={endCallback}/>} */}
+      </ConfigProvider>
     </div>
   );
 }

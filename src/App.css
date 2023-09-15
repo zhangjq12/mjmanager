@@ -2,6 +2,6 @@
   height: 100%;
 }
 
-:where(.css-dev-only-do-not-override-byeoj0).ant-badge {
+/* :where(.css-dev-only-do-not-override-byeoj0).ant-badge {
   color: inherit;
-}
+} */
