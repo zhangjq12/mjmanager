@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Layout, Button, List, Segmented } from "antd";
 import "./index.css";
 // import { generateMock, mockData } from "../../computing/mock/mock";
@@ -90,11 +90,17 @@ export const Match = ({ chars, endCallback, today, gameName, color }) => {
     ele.scrollTop = ele.scrollHeight + 60;
   }, [data]);
 
-  const onClick = () => {
+  const onClick = useCallback(() => {
     setData([]);
     setPlayers([]);
     endCallback(res);
-  };
+  }, [res, endCallback]);
+
+  useEffect(() => {
+    window.onkeydown = (e) => {
+      if (!endDisabled && e.key === " ") onClick();
+    };
+  }, [endDisabled, onClick]);
 
   return (
     <Layout className="layout">
